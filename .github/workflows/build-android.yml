@@ -1,31 +1,63 @@
-name: Build Android APK
+name: Build Midnight Stream APK
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build Godot Android
-        uses: firebelley/godot-export@v6
+      - name: Setup Java (JDK 21)
+        uses: actions/setup-java@v5
         with:
-          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
-          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
-          relative_project_path: ./
-          archive_output: true
-          export_preset: Android
-          export_path: build/midnight-stream.apk
+          distribution: zulu
+          java-version: '21'
 
-      - name: Upload APK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Download Godot
+        run: |
+          wget -q \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip \
+            -O godot.zip
+
+          unzip -q godot.zip
+
+          mv Godot_v4.7.2-stable_linux.x86_64 godot
+
+          chmod +x godot
+
+      - name: Download Godot Export Templates
+        run: |
+          wget -q \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz \
+            -O templates.tpz
+
+          mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable
+
+          unzip -q templates.tpz \
+            -d ~/.local/share/godot/export_templates/4.7.2.stable
+
+      - name: Export Android APK
+        run: |
+          mkdir -p build
+
+          ./godot \
+            --headless \
+            --path . \
+            --export-debug "Android" \
+            build/MidnightStream.apk
+
+      - name: Upload Midnight Stream APK
         uses: actions/upload-artifact@v4
         with:
-          name: midnight-stream-android
-          path: build/midnight-stream.apk
+          name: MidnightStream-APK
+          path: build/MidnightStream.apk
