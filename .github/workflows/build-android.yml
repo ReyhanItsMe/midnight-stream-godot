@@ -15,253 +15,28 @@ jobs:
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
-      # ========================================
-      # 1. CHECKOUT
-      # ========================================
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # ========================================
-      # 2. JAVA 21
-      # ========================================
       - name: Setup Java 21
         uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: '21'
 
-      # ========================================
-      # 3. ANDROID SDK
-      # ========================================
       - name: Setup Android SDK
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
 
-          echo "=== Finding sdkmanager ==="
-
-          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" \
-            -type f \
-            -name sdkmanager \
-            | head -n 1)"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
 
           if [ -z "$SDKMANAGER" ]; then
-            echo "ERROR: sdkmanager not found!"
+            echo "sdkmanager not found"
             exit 1
           fi
 
-          echo "SDKMANAGER=$SDKMANAGER"
-
-          echo "=== sdkmanager version ==="
-          "$SDKMANAGER" --version
-
-          echo "=== Accept Android licenses ==="
-          yes | "$SDKMANAGER" \
-            --sdk_root="$ANDROID_HOME" \
-            --licenses || true
-
-          echo "=== Install platform-tools ==="
-          "$SDKMANAGER" \
-            --sdk_root="$ANDROID_HOME" \
-            "platform-tools"
-
-      # ========================================
-      # 4. DOWNLOAD GODOT
-      # ========================================
-      - name: Download Godot 4.7.2
-        run: |
-          wget -q \
-            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip \
-            -O godot.zip
-
-          echo "=== Extract Godot ==="
-
-          unzip -q godot.zip
-
-          mv Godot_v4.7.2-stable_linux.x86_64 godot
-
-          chmod +x godot
-
-          echo "=== Godot version ==="
-
-          ./godot --version
-
-      # ========================================
-      # 5. DOWNLOAD EXPORT TEMPLATES
-      # ========================================
-      - name: Download Godot Export Templates
-        run: |
-          wget -q \
-            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz \
-            -O templates.tpz
-
-          echo "=== Create template directory ==="
-
-          mkdir -p \
-            "$HOME/.local/share/godot/export_templates/4.7.2.stable"
-
-          echo "=== Extract templates ==="
-
-          unzip -q templates.tpz \
-            -d "$HOME/.local/share/godot/export_templates/4.7.2.stable"
-
-      # ========================================
-      # 6. FIX TEMPLATE DIRECTORY
-      # ========================================
-      - name: Fix Godot Export Template Path
-        run: |
-          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/4.7.2.stable"
-
-          echo "=== Template directory ==="
-          echo "$TEMPLATE_DIR"
-
-          echo "=== Before fix ==="
-          find "$TEMPLATE_DIR" \
-            -maxdepth 3 \
-            -type f \
-            -print
-
-          if [ -d "$TEMPLATE_DIR/templates" ]; then
-            echo "Found nested templates directory."
-
-            mv "$TEMPLATE_DIR/templates/"* \
-              "$TEMPLATE_DIR/"
-
-            rmdir "$TEMPLATE_DIR/templates"
-          fi
-
-          echo "=== After fix ==="
-
-          find "$TEMPLATE_DIR" \
-            -maxdepth 2 \
-            -type f \
-            -print
-
-          echo "=== Checking Android templates ==="
-
-          test -f "$TEMPLATE_DIR/android_debug.apk"
-
-          test -f "$TEMPLATE_DIR/android_release.apk"
-
-          echo "Android export templates found successfully."
-
-      # ========================================
-      # 7. CHECK PROJECT
-      # ========================================
-      - name: Check Godot Project
-        run: |
-          echo "=== Project files ==="
-
-          find . \
-            -maxdepth 3 \
-            -type f \
-            | sort
-
-          echo "=== project.godot ==="
-
-          test -f project.godot
-
-          echo "project.godot found."
-
-          echo "=== export_presets.cfg ==="
-
-          test -f export_presets.cfg
-
-          echo "export_presets.cfg found."
-
-      # ========================================
-      # 8. CHECK GODOT
-      # ========================================
-      - name: Check Godot
-        run: |
-          ./godot --version
-
-      # ========================================
-      # 9. IMPORT PROJECT
-      # ========================================
-      - name: Import Godot Project
-        run: |
-          ./godot \
-            --headless \
-            --path . \
-            --editor \
-            --quit
-
-      # ========================================
-      # 10. EXPORT APK
-      # ========================================
-      - name: Export Android APK
-        run: |
-          mkdir -p build
-
-          echo "=== Exporting Android APK ==="
-
-          ./godot \
-            --headless \
-            --path . \
-            --export-debug "Android" \
-            build/MidnightStream.apk
-
-      # ========================================
-      # 11. CHECK APK
-      # ========================================
-      - name: Check APK
-        run: |
-          echo "=== Build directory ==="
-
-          ls -lah build
-
-          echo "=== APK information ==="
-
-          test -f build/MidnightStream.apk
-
-          du -h build/MidnightStream.apk
-
-          echo "APK build successful."
-
-      # ========================================
-      # 12. UPLOAD APK
-      # ========================================
-      - name: Upload Midnight Stream APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: MidnightStream-APK
-          path: build/MidnightStream.apk
-          if-no-files-found: errorname: Build Midnight Stream APK
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: zulu
-          java-version: '21'
-
-      - name: Setup Android SDK
-        run: |
-          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" \
-            -type f \
-            -name sdkmanager \
-            | head -n 1)"
-
-          echo "Android SDK: $ANDROID_HOME"
-          echo "SDK Manager: $SDKMANAGER"
+          echo "Using: $SDKMANAGER"
 
           "$SDKMANAGER" --version
 
@@ -276,7 +51,7 @@ jobs:
       - name: Download Godot
         run: |
           wget -q \
-            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip \
+            "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip" \
             -O godot.zip
 
           unzip -q godot.zip
@@ -285,20 +60,49 @@ jobs:
 
           chmod +x godot
 
-      - name: Download Godot Export Templates
+          ./godot --version
+
+      - name: Download Export Templates
         run: |
           wget -q \
-            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz" \
             -O templates.tpz
 
-          mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
 
           unzip -q templates.tpz \
-            -d ~/.local/share/godot/export_templates/4.7.2.stable
+            -d "$HOME/.local/share/godot/export_templates/4.7.2.stable"
 
-      - name: Check Godot
+      - name: Fix Export Templates
         run: |
-          ./godot --version
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/4.7.2.stable"
+
+          if [ -d "$TEMPLATE_DIR/templates" ]; then
+            mv "$TEMPLATE_DIR/templates/"* "$TEMPLATE_DIR/"
+            rmdir "$TEMPLATE_DIR/templates"
+          fi
+
+          echo "Templates:"
+          find "$TEMPLATE_DIR" -maxdepth 1 -type f -print
+
+          test -f "$TEMPLATE_DIR/android_debug.apk"
+          test -f "$TEMPLATE_DIR/android_release.apk"
+
+      - name: Check Project
+        run: |
+          test -f project.godot
+          test -f export_presets.cfg
+
+          echo "project.godot OK"
+          echo "export_presets.cfg OK"
+
+      - name: Import Project
+        run: |
+          ./godot \
+            --headless \
+            --path . \
+            --editor \
+            --quit
 
       - name: Export Android APK
         run: |
@@ -310,8 +114,16 @@ jobs:
             --export-debug "Android" \
             build/MidnightStream.apk
 
-      - name: Upload Midnight Stream APK
+      - name: Check APK
+        run: |
+          test -f build/MidnightStream.apk
+
+          echo "APK successfully created:"
+          ls -lh build/MidnightStream.apk
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MidnightStream-APK
           path: build/MidnightStream.apk
+          if-no-files-found: error
