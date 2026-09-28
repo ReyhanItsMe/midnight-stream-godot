@@ -21,7 +21,16 @@ jobs:
           java-version: '21'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+
+          yes | sdkmanager --licenses > /dev/null || true
+
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.1"
 
       - name: Download Godot
         run: |
@@ -45,6 +54,10 @@ jobs:
 
           unzip -q templates.tpz \
             -d ~/.local/share/godot/export_templates/4.7.2.stable
+
+      - name: Check Godot
+        run: |
+          ./godot --version
 
       - name: Export Android APK
         run: |
