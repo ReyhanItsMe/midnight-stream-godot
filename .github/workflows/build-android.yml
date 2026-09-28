@@ -10,11 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Java (JDK 21)
+      - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: zulu
@@ -22,15 +26,23 @@ jobs:
 
       - name: Setup Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" \
+            -type f \
+            -name sdkmanager \
+            | head -n 1)"
 
-          yes | sdkmanager --licenses > /dev/null || true
+          echo "Android SDK: $ANDROID_HOME"
+          echo "SDK Manager: $SDKMANAGER"
 
-          sdkmanager \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.1"
+          "$SDKMANAGER" --version
+
+          yes | "$SDKMANAGER" \
+            --sdk_root="$ANDROID_HOME" \
+            --licenses || true
+
+          "$SDKMANAGER" \
+            --sdk_root="$ANDROID_HOME" \
+            "platform-tools"
 
       - name: Download Godot
         run: |
