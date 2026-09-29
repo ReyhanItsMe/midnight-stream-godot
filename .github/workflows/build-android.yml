@@ -46,7 +46,7 @@ jobs:
 
           "$SDKMANAGER" \
             --sdk_root="$ANDROID_HOME" \
-            "platform-tools"
+            "platform-tools" "build-tools;34.0.0"
 
       - name: Download Godot
         run: |
@@ -104,21 +104,50 @@ jobs:
             --editor \
             --quit
 
-      - name: Export Android APK
+      - name: Export Android APK (Release)
         run: |
           mkdir -p build
 
           ./godot \
             --headless \
             --path . \
-            --export-debug "Android" \
-            build/MidnightStream.apk
+            --export-release "Android" \
+            build/MidnightStream-unsigned.apk
+
+      - name: Sign APK with Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          # 1. Restore keystore dari secret base64
+          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+
+          # 2. Cari path apksigner
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          echo "Using apksigner: $APKSIGNER"
+
+          # 3. Sign APK
+          "$APKSIGNER" sign \
+            --ks release.keystore \
+            --ks-pass "pass:$KEYSTORE_PASSWORD" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --key-pass "pass:$KEY_PASSWORD" \
+            --out build/MidnightStream.apk \
+            build/MidnightStream-unsigned.apk
+
+          # 4. Verifikasi signature
+          "$APKSIGNER" verify --verbose build/MidnightStream.apk
+
+          # 5. Hapus keystore temporary demi keamanan
+          rm -f release.keystore
 
       - name: Check APK
         run: |
           test -f build/MidnightStream.apk
 
-          echo "APK successfully created:"
+          echo "Signed APK successfully created:"
           ls -lh build/MidnightStream.apk
 
       - name: Upload APK
