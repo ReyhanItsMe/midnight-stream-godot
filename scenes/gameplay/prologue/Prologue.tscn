@@ -1,0 +1,71 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/prologue/Prologue.gd" id="1_prologue"]
+[ext_resource type="PackedScene" path="res://scenes/entities/player/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/entities/interactables/Door.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud/HUD.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/entities/interactables/SavePoint.tscn" id="5_savepoint"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/SaveModal.tscn" id="6_savemodal"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
+size = Vector2(640, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
+size = Vector2(16, 360)
+
+[node name="Prologue" type="Node2D"]
+script = ExtResource("1_prologue")
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="SaveModal" parent="UILayer" instance=ExtResource("6_savemodal")]
+
+[node name="WorldEnvironment" type="CanvasModulate" parent="."]
+color = Color(0.28, 0.3, 0.38, 1)
+
+[node name="GridFloor" type="Node2D" parent="."]
+
+[node name="FloorTiles" type="TextureRect" parent="GridFloor"]
+offset_left = -320.0
+offset_top = -180.0
+offset_right = 320.0
+offset_bottom = 180.0
+stretch_mode = 1
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_mask = 2
+
+[node name="WallTop" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0, -172)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="WallBottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0, 172)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="WallLeft" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-312, 0)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="WallRight" type="CollisionShape2D" parent="Walls"]
+position = Vector2(312, 0)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="DoorExit" parent="." instance=ExtResource("3_door")]
+position = Vector2(0, -150)
+target_scene = "res://scenes/ui/screens/main_menu/MainMenu.tscn"
+door_name = "KEMBALI KE STUDIO"
+
+[node name="SavePoint" parent="." instance=ExtResource("5_savepoint")]
+position = Vector2(140, -50)
+station_name = "TERMINAL REKAMAN"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(0, 20)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true

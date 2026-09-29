@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/player/Player.gd" id="1_player"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rian"]
+size = Vector2(14, 8)
+
+[node name="Player" type="CharacterBody2D"]
+z_index = 5
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_player")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -12)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_rian")
+
+[node name="Flashlight" type="PointLight2D" parent="."]
+position = Vector2(0, -6)
+color = Color(1, 0.94, 0.8, 1)
+energy = 1.35
+
+[node name="InteractionRay" type="RayCast2D" parent="."]
+position = Vector2(0, -4)
+target_position = Vector2(0, 24)
+collision_mask = 8
+collide_with_areas = true
