@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -136,9 +139,12 @@ jobs:
           echo "Signed APK successfully created:"
           ls -lh build/MidnightStream.apk
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: MidnightStream-APK
-          path: build/MidnightStream.apk
-          if-no-files-found: error
+          tag_name: "v1.0.build-${{ github.run_number }}"
+          name: "Midnight Stream v1.0 (Build ${{ github.run_number }})"
+          draft: true
+          files: build/MidnightStream.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
