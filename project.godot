@@ -10,10 +10,10 @@ config_version=5
 
 [application]
 
-config/name="midnight-stream"
+config/name="Midnight Stream"
 run/main_scene="res://scenes/ui/screens/intro/Intro.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
-config/icon="res://icon.svg"
+config/icon="res://assets/ui/icons/app-icon.png"
 
 [autoload]
 
