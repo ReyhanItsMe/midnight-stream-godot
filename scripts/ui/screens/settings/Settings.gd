@@ -2,7 +2,6 @@ extends Control
 
 # --- RESOURCE PATHS ---
 const BG_PATH: String = "res://assets/ui/backgrounds/setting/background-setting.png"
-const FONT_PATH: String = "res://assets/fonts/Pix32.ttf"
 const BACK_SCENE_PATH: String = "res://scenes/ui/screens/main_menu/MainMenu.tscn"
 const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/ui/components/MenuButton.tscn")
 
@@ -21,8 +20,6 @@ const COLOR_VALUE: Color = Color(0.95, 0.82, 0.25)
 # --- TIMINGS & TRANSITIONS ---
 const FADE_DURATION: float = 0.35
 
-var custom_font: FontFile
-
 # Nilai Setting Sementara
 var bgm_percent: int = 50
 var sfx_percent: int = 100
@@ -34,17 +31,16 @@ var lbl_sfx_val: Label
 var lbl_shake_val: Label
 
 func _ready() -> void:
-	if ResourceLoader.exists(FONT_PATH):
-		custom_font = load(FONT_PATH)
-
 	# Pastikan BGM Menu tetap menyala
 	AudioManager.play_menu_bgm()
 
 	# Ambil data dari SaveManager
 	if SaveManager and SaveManager.current_data.has("settings"):
 		var conf: Dictionary = SaveManager.current_data["settings"]
-		bgm_percent = int(conf.get("bgm_volume", 0.5) * 100)
-		sfx_percent = int(conf.get("sfx_volume", 1.0) * 100)
+		var raw_bgm = conf.get("bgm_volume", 0.5)
+		var raw_sfx = conf.get("sfx_volume", 1.0)
+		bgm_percent = int(float(raw_bgm) * 100 if float(raw_bgm) <= 1.0 else float(raw_bgm))
+		sfx_percent = int(float(raw_sfx) * 100 if float(raw_sfx) <= 1.0 else float(raw_sfx))
 		screen_shake = conf.get("screen_shake_enabled", true)
 
 	# 1. Background Setting
@@ -56,7 +52,7 @@ func _ready() -> void:
 		bg.texture = load(BG_PATH)
 	add_child(bg)
 
-	# 2. Center Container (Tengah Layar 640x360)
+	# 2. Center Container
 	var center_cont := CenterContainer.new()
 	center_cont.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center_cont)
@@ -66,11 +62,11 @@ func _ready() -> void:
 	main_vbox.add_theme_constant_override("separation", 12)
 	center_cont.add_child(main_vbox)
 
-	# Judul Kuning
+	# Header Judul
 	var title := Label.new()
 	title.text = TEXT_HEADER
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	apply_font(title, 12, COLOR_HEADER)
+	FontManager.apply(title, FontManager.Type.TITLE, 14, COLOR_HEADER)
 	main_vbox.add_child(title)
 
 	var spacer := Control.new()
@@ -120,10 +116,10 @@ func create_stepper_row(parent: VBoxContainer, label_title: String, initial_val:
 	var lbl := Label.new()
 	lbl.text = label_title
 	lbl.custom_minimum_size = Vector2(110, 0)
-	apply_font(lbl, 10, COLOR_LABEL)
+	FontManager.apply(lbl, FontManager.Type.BODY, 10, COLOR_LABEL)
 	hbox.add_child(lbl)
 
-	# Tombol [-] Menggunakan Komponen GameMenuButton
+	# Tombol [-]
 	var btn_minus: GameMenuButton = MENU_BUTTON_SCENE.instantiate()
 	btn_minus.text = "-"
 	btn_minus.set_dimensions(24, 20)
@@ -131,15 +127,15 @@ func create_stepper_row(parent: VBoxContainer, label_title: String, initial_val:
 	btn_minus.pressed.connect(on_minus)
 	hbox.add_child(btn_minus)
 
-	# Nilai Tengah (Warna Kuning Emas)
+	# Nilai Tengah Counter
 	var lbl_val := Label.new()
 	lbl_val.text = initial_val
 	lbl_val.custom_minimum_size = Vector2(46, 0)
 	lbl_val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	apply_font(lbl_val, 10, COLOR_VALUE)
+	FontManager.apply(lbl_val, FontManager.Type.DIGITAL, 11, COLOR_VALUE)
 	hbox.add_child(lbl_val)
 
-	# Tombol [+] Menggunakan Komponen GameMenuButton
+	# Tombol [+]
 	var btn_plus: GameMenuButton = MENU_BUTTON_SCENE.instantiate()
 	btn_plus.text = "+"
 	btn_plus.set_dimensions(24, 20)
@@ -154,32 +150,27 @@ func change_volume(bus_type: String, delta_val: int) -> void:
 	if bus_type == "bgm":
 		bgm_percent = clampi(bgm_percent + delta_val, 0, 100)
 		lbl_bgm_val.text = str(bgm_percent) + "%"
-		AudioManager.set_bgm_volume(bgm_percent)
+		if SaveManager and SaveManager.current_data.has("settings"):
+			SaveManager.current_data["settings"]["bgm_volume"] = float(bgm_percent) / 100.0
+			SaveManager.apply_audio_settings()
 	elif bus_type == "sfx":
 		sfx_percent = clampi(sfx_percent + delta_val, 0, 100)
 		lbl_sfx_val.text = str(sfx_percent) + "%"
-		AudioManager.set_sfx_volume(sfx_percent)
+		if SaveManager and SaveManager.current_data.has("settings"):
+			SaveManager.current_data["settings"]["sfx_volume"] = float(sfx_percent) / 100.0
+			SaveManager.apply_audio_settings()
 
 
 func toggle_shake() -> void:
 	screen_shake = !screen_shake
 	lbl_shake_val.text = "ON" if screen_shake else "OFF"
-
-
-func apply_font(lbl: Label, font_size: int, color: Color) -> void:
-	if custom_font:
-		lbl.add_theme_font_override("font", custom_font)
-	lbl.add_theme_font_size_override("font_size", font_size)
-	lbl.add_theme_color_override("font_color", color)
+	if SaveManager and SaveManager.current_data.has("settings"):
+		SaveManager.current_data["settings"]["screen_shake_enabled"] = screen_shake
 
 
 func _on_back_pressed() -> void:
-	# Simpan perubahan ke SaveManager
-	if SaveManager and SaveManager.current_data.has("settings"):
-		SaveManager.current_data["settings"]["bgm_volume"] = float(bgm_percent) / 100.0
-		SaveManager.current_data["settings"]["sfx_volume"] = float(sfx_percent) / 100.0
-		SaveManager.current_data["settings"]["screen_shake_enabled"] = screen_shake
-		SaveManager.save_game()
+	# Pastikan setting tersimpan permanen ke file disk sebelum pindah scene
+	if SaveManager:
+		SaveManager.save_settings()
 
-	# Pindah ke Main Menu dengan transisi fade hitam
 	TransitionManager.change_scene(BACK_SCENE_PATH, FADE_DURATION)

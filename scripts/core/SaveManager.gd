@@ -58,9 +58,9 @@ var play_time_timer: float = 0.0
 func _ready() -> void:
 	current_data = default_data.duplicate(true)
 	load_settings()
+	apply_audio_settings()
 
 func _process(delta: float) -> void:
-	# Akumulasi durasi bermain saat gameplay aktif
 	play_time_timer += delta
 	if play_time_timer >= 1.0:
 		play_time_timer -= 1.0
@@ -72,19 +72,16 @@ func _process(delta: float) -> void:
 # SISTEM MEKANIK SANITY
 # ==============================================================================
 
-## Mengambil nilai angka sanity saat ini
 func get_current_sanity() -> float:
 	if current_data.has("player") and current_data["player"].has("sanity"):
 		return float(current_data["player"]["sanity"])
 	return MAX_SANITY
 
 
-## Mengambil persentase rasio sanity (0.0 sampai 1.0) untuk ProgressBar HUD
 func get_sanity_ratio() -> float:
 	return get_current_sanity() / MAX_SANITY
 
 
-## Mengurangi sanity player (efek gelap/hantu)
 func damage_sanity(amount: float) -> void:
 	if amount <= 0.0:
 		return
@@ -94,7 +91,6 @@ func damage_sanity(amount: float) -> void:
 	_check_sanity_status(current_sanity)
 
 
-## Memulihkan sanity player (cahaya/pil)
 func restore_sanity(amount: float) -> void:
 	if amount <= 0.0:
 		return
@@ -166,7 +162,6 @@ func get_slot_summary(slot_index: int) -> String:
 	return "EMPTY ARCHIVE SLOT"
 
 
-## Mengambil scene tempat save dilakukan (fallback ke Prologue jika kosong/hilang)
 func get_saved_scene_path() -> String:
 	if current_data.has("meta") and current_data["meta"].has("scene_path"):
 		var path: String = current_data["meta"]["scene_path"]
@@ -179,7 +174,6 @@ func save_to_slot(slot_index: int = active_slot) -> bool:
 	active_slot = clampi(slot_index, 1, MAX_SLOTS)
 	current_data["meta"]["save_date"] = Time.get_datetime_string_from_system(false, true)
 
-	# Rekam scene aktif saat ini secara otomatis
 	var scene_now := get_tree().current_scene
 	if scene_now and scene_now.scene_file_path != "":
 		current_data["meta"]["scene_path"] = scene_now.scene_file_path
@@ -229,7 +223,7 @@ func delete_slot(slot_index: int) -> bool:
 
 
 # ==============================================================================
-# SETTINGS PERSISTENCE
+# SETTINGS PERSISTENCE & HARDWARE AUDIO SYNC
 # ==============================================================================
 
 func save_game() -> bool:
@@ -242,6 +236,7 @@ func save_settings() -> bool:
 		return false
 	file.store_string(JSON.stringify(current_data.get("settings", {}), "\t"))
 	file.close()
+	apply_audio_settings()
 	return true
 
 
@@ -254,6 +249,35 @@ func load_settings() -> void:
 	var json := JSON.new()
 	if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
 		current_data["settings"] = json.data
+		apply_audio_settings()
+
+
+## Menerapkan volume secara menyeluruh ke AudioServer Godot & AudioManager
+func apply_audio_settings() -> void:
+	var settings_dict: Dictionary = current_data.get("settings", {})
+	var raw_bgm = settings_dict.get("bgm_volume", 0.5)
+	var raw_sfx = settings_dict.get("sfx_volume", 1.0)
+
+	var bgm_vol: float = float(raw_bgm) if float(raw_bgm) <= 1.0 else float(raw_bgm) / 100.0
+	var sfx_vol: float = float(raw_sfx) if float(raw_sfx) <= 1.0 else float(raw_sfx) / 100.0
+
+	set_bus_volume("BGM", bgm_vol)
+	set_bus_volume("SFX", sfx_vol)
+
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("apply_saved_volume"):
+		audio_mgr.apply_saved_volume()
+
+
+func set_bus_volume(bus_name: String, linear_val: float) -> void:
+	var bus_idx := AudioServer.get_bus_index(bus_name)
+	if bus_idx != -1:
+		if linear_val <= 0.001:
+			AudioServer.set_bus_mute(bus_idx, true)
+			AudioServer.set_bus_volume_db(bus_idx, -80.0)
+		else:
+			AudioServer.set_bus_mute(bus_idx, false)
+			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(linear_val))
 
 
 func reset_to_new_game() -> void:

@@ -16,12 +16,8 @@ func _ready() -> void:
 	bgm_player.bus = BUS_BGM
 	add_child(bgm_player)
 
-	# Muat konfigurasi volume awal dari SaveManager
-	var save_mgr := get_tree().root.get_node_or_null("SaveManager")
-	if save_mgr and save_mgr.get("current_data") != null:
-		var conf: Dictionary = save_mgr.current_data.get("settings", {})
-		set_bgm_volume(int(conf.get("bgm_volume", 0.5) * 100))
-		set_sfx_volume(int(conf.get("sfx_volume", 1.0) * 100))
+	# Terapkan volume awal
+	apply_saved_volume()
 
 
 ## Membuat Bus BGM & SFX secara otomatis lewat kode jika belum ada
@@ -37,6 +33,25 @@ func _setup_audio_buses() -> void:
 		AudioServer.add_bus(idx)
 		AudioServer.set_bus_name(idx, BUS_SFX)
 		AudioServer.set_bus_send(idx, BUS_MASTER)
+
+
+## Fungsi sinkronisasi volume dari SaveManager
+func apply_saved_volume() -> void:
+	var save_mgr := get_node_or_null("/root/SaveManager")
+	if not save_mgr or not ("current_data" in save_mgr):
+		return
+
+	var conf: Dictionary = save_mgr.current_data.get("settings", {})
+	
+	# Ambil data (bisa berupa 0.0 - 1.0 atau 0 - 100)
+	var raw_bgm = conf.get("bgm_volume", 0.5)
+	var raw_sfx = conf.get("sfx_volume", 1.0)
+
+	var bgm_val: float = float(raw_bgm) if float(raw_bgm) <= 1.0 else float(raw_bgm) / 100.0
+	var sfx_val: float = float(raw_sfx) if float(raw_sfx) <= 1.0 else float(raw_sfx) / 100.0
+
+	set_bgm_volume(int(bgm_val * 100))
+	set_sfx_volume(int(sfx_val * 100))
 
 
 ## Memutar musik menu. Jika lagu yang sama sudah menyala, tidak akan di-restart.
@@ -56,12 +71,22 @@ func play_bgm(track_path: String, fade_in_duration: float = 0.5) -> void:
 		bgm_tween.kill()
 
 	var stream: AudioStream = load(track_path)
-	# Aktifkan looping untuk MP3
 	if stream is AudioStreamMP3:
 		stream.loop = true
 
 	current_bgm_path = track_path
 	bgm_player.stream = stream
+
+	# Cek apakah bus BGM di-mute atau volume 0
+	var bus_idx := AudioServer.get_bus_index(BUS_BGM)
+	var is_muted := false
+	if bus_idx != -1:
+		is_muted = AudioServer.is_bus_mute(bus_idx)
+
+	if is_muted:
+		bgm_player.volume_db = -80.0
+		bgm_player.play()
+		return
 
 	if fade_in_duration > 0.0:
 		bgm_player.volume_db = -40.0
@@ -73,7 +98,7 @@ func play_bgm(track_path: String, fade_in_duration: float = 0.5) -> void:
 		bgm_player.play()
 
 
-## Menghentikan BGM dengan efek suara mengecil perlahan (saat masuk Gameplay)
+## Menghentikan BGM dengan efek suara mengecil perlahan
 func stop_bgm(fade_out_duration: float = 0.6) -> void:
 	if not bgm_player.playing:
 		return
@@ -109,6 +134,7 @@ func _apply_bus_volume(bus_name: String, percent: int) -> void:
 	var clamped := clampi(percent, 0, 100)
 	if clamped == 0:
 		AudioServer.set_bus_mute(bus_idx, true)
+		AudioServer.set_bus_volume_db(bus_idx, -80.0)
 	else:
 		AudioServer.set_bus_mute(bus_idx, false)
 		AudioServer.set_bus_volume_db(bus_idx, linear_to_db(float(clamped) / 100.0))

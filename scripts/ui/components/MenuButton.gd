@@ -16,8 +16,10 @@ enum IconAlignMode {
 }
 
 # --- CONSTANTS ---
-const DEFAULT_FONT_PATH: String = "res://assets/fonts/Pix32.ttf"
 const DEFAULT_SFX_PATH: String = "res://assets/audio/sfx/sfx-click-button.mp3"
+
+# Kecepatan Playback SFX (1.35 = ~35% lebih cepat dan renyah)
+const SFX_PITCH_FAST: float = 1.35
 
 # Animasi Klik
 const CLICK_SCALE_DOWN: Vector2 = Vector2(0.95, 0.95)
@@ -60,28 +62,25 @@ const RELEASE_TWEEN_DURATION: float = 0.12
 @export var custom_sfx: AudioStream = null
 
 var sfx_player: AudioStreamPlayer
-var base_font: FontFile
 var anim_tween: Tween
-var original_pos_y: float = 0.0
 
 func _ready() -> void:
 	custom_minimum_size = button_size
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	
+
 	_update_pivot()
-	_load_font()
+	_update_font()
 	_apply_theme_styles()
 	_setup_icon()
 	_setup_audio()
 
-	# Connect signal untuk animasi tekan dan lepas
+	# Signal animasi tombol
 	button_down.connect(_on_button_down_anim)
 	button_up.connect(_on_button_up_anim)
 	pressed.connect(_on_pressed_internal)
 
 
 func _update_pivot() -> void:
-	# Memastikan pivot berada tepat di tengah tombol agar efek skala seimbang
 	pivot_offset = custom_minimum_size / 2.0
 
 
@@ -112,7 +111,6 @@ func _on_button_down_anim() -> void:
 		anim_tween.kill()
 
 	anim_tween = create_tween().set_parallel(true)
-	# Mengecilkan tombol sedikit & mendorongnya ke bawah 1-2 pixel
 	anim_tween.tween_property(self, "scale", CLICK_SCALE_DOWN, PRESS_TWEEN_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	anim_tween.tween_property(self, "position:y", position.y + CLICK_PIXEL_OFFSET_Y, PRESS_TWEEN_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
@@ -122,24 +120,19 @@ func _on_button_up_anim() -> void:
 		anim_tween.kill()
 
 	anim_tween = create_tween().set_parallel(true)
-	# Membalikan ukuran dan posisi tombol ke semula dengan bounce/back ringan
 	anim_tween.tween_property(self, "scale", Vector2.ONE, RELEASE_TWEEN_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	anim_tween.tween_property(self, "position:y", position.y - CLICK_PIXEL_OFFSET_Y, RELEASE_TWEEN_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 
 # ==============================================================================
-# INTERNAL SETUP & STYLING
+# FONT & THEME STYLING
 # ==============================================================================
 
-func _load_font() -> void:
-	if ResourceLoader.exists(DEFAULT_FONT_PATH):
-		base_font = load(DEFAULT_FONT_PATH)
-		add_theme_font_override("font", base_font)
-	_update_font()
-
-
 func _update_font() -> void:
-	add_theme_font_size_override("font_size", font_size_override)
+	if Engine.has_singleton("FontManager") or get_node_or_null("/root/FontManager") != null:
+		FontManager.apply(self, FontManager.Type.BODY_BOLD, font_size_override, Color(0.9, 0.92, 0.95))
+	else:
+		add_theme_font_size_override("font_size", font_size_override)
 
 
 func _setup_icon() -> void:
@@ -205,20 +198,29 @@ func _apply_theme_styles() -> void:
 	add_theme_stylebox_override("focus", style_normal)
 
 
+# ==============================================================================
+# AUDIO (CLICK SFX SPEEDUP)
+# ==============================================================================
+
 func _setup_audio() -> void:
 	if not enable_sfx:
 		return
 
 	sfx_player = AudioStreamPlayer.new()
 	sfx_player.bus = "SFX"
+	# Menaikkan pitch scale agar durasi playback lebih pendek dan instan
+	sfx_player.pitch_scale = SFX_PITCH_FAST
+
 	if custom_sfx:
 		sfx_player.stream = custom_sfx
 	elif ResourceLoader.exists(DEFAULT_SFX_PATH):
 		sfx_player.stream = load(DEFAULT_SFX_PATH)
-	
+
 	add_child(sfx_player)
 
 
 func _on_pressed_internal() -> void:
 	if enable_sfx and sfx_player and sfx_player.stream:
+		# Restart SFX jika diklik beruntun tanpa terpotong error
+		sfx_player.stop()
 		sfx_player.play()

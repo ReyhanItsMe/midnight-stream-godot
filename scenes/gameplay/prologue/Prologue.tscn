@@ -24,7 +24,7 @@ layer = 20
 [node name="SaveModal" parent="UILayer" instance=ExtResource("6_savemodal")]
 
 [node name="WorldEnvironment" type="CanvasModulate" parent="."]
-color = Color(0.28, 0.3, 0.38, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="GridFloor" type="Node2D" parent="."]
 

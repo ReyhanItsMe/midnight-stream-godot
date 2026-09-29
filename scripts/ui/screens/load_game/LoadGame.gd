@@ -3,7 +3,6 @@ extends Control
 # --- RESOURCE PATHS ---
 const BG_PATH: String = "res://assets/ui/backgrounds/load-game/background-load-game.png"
 const BG_FALLBACK_PATH: String = "res://assets/ui/backgrounds/setting/background-setting.png"
-const FONT_PATH: String = "res://assets/fonts/Pix32.ttf"
 const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/ui/components/MenuButton.tscn")
 const INFO_MODAL_SCENE: PackedScene = preload("res://scenes/ui/components/InfoModal.tscn")
 
@@ -25,14 +24,14 @@ const COLOR_CARD_BG_IDLE: Color = Color(0.05, 0.06, 0.09, 0.75)
 const COLOR_BORDER_IDLE: Color = Color(0.22, 0.25, 0.32, 0.8)
 const COLOR_SCROLL_TRACK: Color = Color(0.12, 0.14, 0.18, 0.9)
 
-# --- CONSTANTS ---
+# --- CONSTANTS & DIMENSIONS ---
 const MAX_SLOTS: int = 20
-const SCROLL_TRACK_HEIGHT: float = 88.0
+const SCROLL_TRACK_HEIGHT: float = 96.0
 const SCROLL_THUMB_HEIGHT: float = 14.0
+const CARDS_CONTAINER_WIDTH: float = 280.0
 const FADE_DURATION: float = 0.35
 const SLOT_FADE_TIME: float = 0.16
 
-var custom_font: FontFile
 var selected_slot: int = 1
 var slot_tween: Tween
 var thumb_tween: Tween
@@ -43,9 +42,6 @@ var slot_cards: Array[Dictionary] = []
 var info_modal: InfoModal
 
 func _ready() -> void:
-	if ResourceLoader.exists(FONT_PATH):
-		custom_font = load(FONT_PATH)
-
 	AudioManager.play_menu_bgm()
 
 	# 1. Background
@@ -59,7 +55,7 @@ func _ready() -> void:
 		bg.texture = load(BG_FALLBACK_PATH)
 	add_child(bg)
 
-	# 2. Area 3/4 Kanan
+	# 2. Area Kanan
 	var right_area := CenterContainer.new()
 	right_area.anchor_left = 0.23
 	right_area.anchor_top = 0.0
@@ -72,29 +68,31 @@ func _ready() -> void:
 	main_vbox.add_theme_constant_override("separation", 6)
 	right_area.add_child(main_vbox)
 
-	# Header & Slot Index
+	# Header Judul
 	var header_lbl := Label.new()
 	header_lbl.text = TEXT_HEADER
 	header_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	apply_font(header_lbl, 11, COLOR_GOLD)
+	FontManager.apply(header_lbl, FontManager.Type.TITLE, 14, COLOR_GOLD)
 	main_vbox.add_child(header_lbl)
 
+	# Indikator Slot Counter (SLOT 01 / 20)
 	lbl_slot_counter = Label.new()
 	lbl_slot_counter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	apply_font(lbl_slot_counter, 10, COLOR_WHITE)
+	FontManager.apply(lbl_slot_counter, FontManager.Type.DIGITAL, 11, COLOR_WHITE)
 	main_vbox.add_child(lbl_slot_counter)
 
 	var top_spacer := Control.new()
-	top_spacer.custom_minimum_size = Vector2(0, 2)
+	top_spacer.custom_minimum_size = Vector2(0, 4)
 	main_vbox.add_child(top_spacer)
 
-	# Middle Area (3 Slots, Scrollbar, Arrow Buttons)
+	# 3. Area Tengah: Slot Tetap + Scrollbar & Tombol Panah Statis di Kanan
 	var middle_hbox := HBoxContainer.new()
 	middle_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	middle_hbox.add_theme_constant_override("separation", 10)
 	main_vbox.add_child(middle_hbox)
 
 	var cards_vbox := VBoxContainer.new()
+	cards_vbox.custom_minimum_size = Vector2(CARDS_CONTAINER_WIDTH, 110)
 	cards_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	cards_vbox.add_theme_constant_override("separation", 6)
 	middle_hbox.add_child(cards_vbox)
@@ -103,6 +101,7 @@ func _ready() -> void:
 	slot_cards.append(_create_slot_card(cards_vbox, true))
 	slot_cards.append(_create_slot_card(cards_vbox, false))
 
+	# Scrollbar Track
 	var scroll_track := ColorRect.new()
 	scroll_track.custom_minimum_size = Vector2(4, SCROLL_TRACK_HEIGHT)
 	scroll_track.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -114,6 +113,7 @@ func _ready() -> void:
 	scroll_thumb.color = COLOR_GOLD
 	scroll_track.add_child(scroll_thumb)
 
+	# Tombol Panah
 	var nav_vbox := VBoxContainer.new()
 	nav_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	nav_vbox.add_theme_constant_override("separation", 8)
@@ -135,7 +135,7 @@ func _ready() -> void:
 	bottom_spacer.custom_minimum_size = Vector2(0, 8)
 	main_vbox.add_child(bottom_spacer)
 
-	# Action Buttons
+	# 4. Tombol Aksi Bawah
 	var action_hbox := HBoxContainer.new()
 	action_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	action_hbox.add_theme_constant_override("separation", 10)
@@ -160,7 +160,7 @@ func _ready() -> void:
 	btn_back.pressed.connect(_on_back_pressed)
 	action_hbox.add_child(btn_back)
 
-	# 3. Mount InfoModal Component
+	# 5. Pasang InfoModal
 	info_modal = INFO_MODAL_SCENE.instantiate()
 	add_child(info_modal)
 
@@ -169,9 +169,8 @@ func _ready() -> void:
 
 func _create_slot_card(parent: VBoxContainer, is_center_active: bool) -> Dictionary:
 	var panel := PanelContainer.new()
-	var card_size := Vector2(264, 34) if is_center_active else Vector2(218, 26)
-	panel.custom_minimum_size = card_size
-	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	panel.custom_minimum_size = Vector2(CARDS_CONTAINER_WIDTH, 34 if is_center_active else 26)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var style := StyleBoxFlat.new()
 	style.bg_color = COLOR_CARD_BG_ACTIVE if is_center_active else COLOR_CARD_BG_IDLE
@@ -186,11 +185,11 @@ func _create_slot_card(parent: VBoxContainer, is_center_active: bool) -> Diction
 
 	var hbox := HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_BEGIN
-	hbox.add_theme_constant_override("separation", 10)
+	hbox.add_theme_constant_override("separation", 8)
 	panel.add_child(hbox)
 
 	var badge_panel := PanelContainer.new()
-	badge_panel.custom_minimum_size = Vector2(32, 22) if is_center_active else Vector2(26, 18)
+	badge_panel.custom_minimum_size = Vector2(34, 22) if is_center_active else Vector2(28, 18)
 	badge_panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 	var badge_style := StyleBoxFlat.new()
@@ -203,12 +202,14 @@ func _create_slot_card(parent: VBoxContainer, is_center_active: bool) -> Diction
 	var lbl_num := Label.new()
 	lbl_num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl_num.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	apply_font(lbl_num, 10 if is_center_active else 8, COLOR_GOLD if is_center_active else COLOR_DIM_TEXT)
+	FontManager.apply(lbl_num, FontManager.Type.DIGITAL, 10 if is_center_active else 8, COLOR_GOLD if is_center_active else COLOR_DIM_TEXT)
 	badge_panel.add_child(lbl_num)
 
 	var lbl_desc := Label.new()
+	lbl_desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lbl_desc.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	apply_font(lbl_desc, 10 if is_center_active else 8, COLOR_DIM_TEXT)
+	lbl_desc.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	FontManager.apply(lbl_desc, FontManager.Type.BODY, 9 if is_center_active else 8, COLOR_DIM_TEXT)
 	hbox.add_child(lbl_desc)
 
 	return {
@@ -274,7 +275,7 @@ func _refresh_slots_display(animate: bool) -> void:
 				if not card["visible_state"]:
 					lbl_num.text = "#%d" % slot_idx
 					lbl_desc.text = summary_text
-					apply_font(lbl_desc, 10 if card["is_center"] else 8, desc_color)
+					FontManager.apply(lbl_desc, FontManager.Type.BODY, 9 if card["is_center"] else 8, desc_color)
 					panel.modulate.a = 0.0
 					hbox.modulate.a = 1.0
 					slot_tween.tween_property(panel, "modulate:a", target_panel_alpha, SLOT_FADE_TIME).set_trans(Tween.TRANS_SINE)
@@ -282,13 +283,13 @@ func _refresh_slots_display(animate: bool) -> void:
 					hbox.modulate.a = 0.2
 					lbl_num.text = "#%d" % slot_idx
 					lbl_desc.text = summary_text
-					apply_font(lbl_desc, 10 if card["is_center"] else 8, desc_color)
+					FontManager.apply(lbl_desc, FontManager.Type.BODY, 9 if card["is_center"] else 8, desc_color)
 					slot_tween.tween_property(panel, "modulate:a", target_panel_alpha, SLOT_FADE_TIME)
 					slot_tween.tween_property(hbox, "modulate:a", 1.0, SLOT_FADE_TIME).set_trans(Tween.TRANS_SINE)
 			else:
 				lbl_num.text = "#%d" % slot_idx
 				lbl_desc.text = summary_text
-				apply_font(lbl_desc, 10 if card["is_center"] else 8, desc_color)
+				FontManager.apply(lbl_desc, FontManager.Type.BODY, 9 if card["is_center"] else 8, desc_color)
 				panel.modulate.a = target_panel_alpha
 				hbox.modulate.a = 1.0
 
@@ -300,31 +301,40 @@ func _refresh_slots_display(animate: bool) -> void:
 # ==============================================================================
 
 func _on_load_pressed() -> void:
-	if SaveManager.has_slot_file(selected_slot):
-		if SaveManager.load_from_slot(selected_slot):
-			AudioManager.stop_bgm(0.5)
-			# Ambil jalur scene tempat pemain terakhir kali melakukan save
-			var target_scene_path: String = SaveManager.get_saved_scene_path()
-			TransitionManager.change_scene(target_scene_path, 0.5)
-	else:
+	if not SaveManager.has_slot_file(selected_slot):
 		info_modal.popup("EMPTY LOG", "Slot #%d masih kosong. Tidak ada sinyal rekaman." % selected_slot)
+		return
+
+	var summary := SaveManager.get_slot_summary(selected_slot)
+	info_modal.popup_confirm(
+		"KONFIRMASI MUAT LOG",
+		"Yakin ingin memuat rekaman ini?\n%s" % summary,
+		"YA, MUAT",
+		false,
+		func():
+			if SaveManager.load_from_slot(selected_slot):
+				AudioManager.stop_bgm(0.5)
+				var target_scene_path: String = SaveManager.get_saved_scene_path()
+				TransitionManager.change_scene(target_scene_path, 0.5)
+	)
 
 
 func _on_delete_pressed() -> void:
-	if SaveManager.has_slot_file(selected_slot):
-		SaveManager.delete_slot(selected_slot)
-		_refresh_slots_display(true)
-		info_modal.popup("ARCHIVE DELETED", "Rekaman pada Slot #%d telah dihapus permanen." % selected_slot)
-	else:
+	if not SaveManager.has_slot_file(selected_slot):
 		info_modal.popup("EMPTY LOG", "Slot #%d masih kosong. Tidak ada data untuk dihapus." % selected_slot)
+		return
+
+	info_modal.popup_confirm(
+		"PERINGATAN HAPUS DATA",
+		"Yakin ingin menghapus Slot #%d?\nData yang dihapus TIDAK DAPAT DIURUNGKAN!" % selected_slot,
+		"YA, HAPUS",
+		true,
+		func():
+			SaveManager.delete_slot(selected_slot)
+			_refresh_slots_display(true)
+			info_modal.popup("ARCHIVE DELETED", "Rekaman pada Slot #%d telah dimusnahkan secara permanen." % selected_slot)
+	)
 
 
 func _on_back_pressed() -> void:
 	TransitionManager.change_scene(BACK_SCENE_PATH, FADE_DURATION)
-
-
-func apply_font(lbl: Label, font_size: int, color: Color) -> void:
-	if custom_font:
-		lbl.add_theme_font_override("font", custom_font)
-	lbl.add_theme_font_size_override("font_size", font_size)
-	lbl.add_theme_color_override("font_color", color)

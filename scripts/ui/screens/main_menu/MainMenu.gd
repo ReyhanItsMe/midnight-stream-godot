@@ -3,7 +3,6 @@ extends Control
 # --- RESOURCE PATHS ---
 const BG_PATH: String = "res://assets/ui/backgrounds/menu/background-menu.png"
 const TITLE_IMG_PATH: String = "res://assets/ui/titles/title-games.png"
-const FONT_PATH: String = "res://assets/fonts/Pix32.ttf"
 const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/ui/components/MenuButton.tscn")
 
 # --- NAVIGATION TARGET PATHS ---
@@ -29,13 +28,8 @@ const COLOR_FOOTER: Color = Color(0.65, 0.7, 0.75, 0.8)
 const TITLE_SPACER_HEIGHT: float = 8.0
 const FADE_DURATION: float = 0.35
 
-var custom_font: FontFile
-
 func _ready() -> void:
-	if ResourceLoader.exists(FONT_PATH):
-		custom_font = load(FONT_PATH)
-
-	# 1. Nyalakan BGM Menu (Tidak akan restart jika sudah menyala dari halaman lain)
+	# 1. Nyalakan BGM Menu (Tidak restart jika sudah berjalan)
 	AudioManager.play_menu_bgm()
 
 	# 2. Background Menu (640x360)
@@ -57,14 +51,14 @@ func _ready() -> void:
 	main_vbox.add_theme_constant_override("separation", 6)
 	center_cont.add_child(main_vbox)
 
-	# Subtitle Merah
+	# Subtitle Merah (Geist-Pixel)
 	var subtitle := Label.new()
 	subtitle.text = TEXT_SUBTITLE
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	apply_font(subtitle, 10, COLOR_SUBTITLE)
+	FontManager.apply(subtitle, FontManager.Type.RETRO_ALT, 10, COLOR_SUBTITLE)
 	main_vbox.add_child(subtitle)
 
-	# Title Graphic / Fallback
+	# Title Graphic / Fallback Teks (Jersey 25 Arcade)
 	if ResourceLoader.exists(TITLE_IMG_PATH):
 		var title_tex := TextureRect.new()
 		title_tex.texture = load(TITLE_IMG_PATH)
@@ -74,7 +68,7 @@ func _ready() -> void:
 		var title_lbl := Label.new()
 		title_lbl.text = TEXT_TITLE_FALLBACK
 		title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		apply_font(title_lbl, 24, COLOR_TITLE_FALLBACK)
+		FontManager.apply(title_lbl, FontManager.Type.TITLE, 28, COLOR_TITLE_FALLBACK)
 		main_vbox.add_child(title_lbl)
 
 	var spacer := Control.new()
@@ -92,7 +86,7 @@ func _ready() -> void:
 	btn_vbox.add_child(build_button(TEXT_BTN_SETTINGS, _on_settings_pressed))
 	btn_vbox.add_child(build_button(TEXT_BTN_EXIT, _on_exit_pressed, GameMenuButton.Variant.DANGER))
 
-	# 5. Footer Credit
+	# 5. Footer Credit Terminal (Handjet)
 	var footer := Label.new()
 	footer.text = TEXT_FOOTER_CREDIT
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -101,7 +95,7 @@ func _ready() -> void:
 	footer.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	footer.offset_right = -14
 	footer.offset_bottom = -8
-	apply_font(footer, 8, COLOR_FOOTER)
+	FontManager.apply(footer, FontManager.Type.DIGITAL, 9, COLOR_FOOTER)
 	add_child(footer)
 
 
@@ -110,22 +104,15 @@ func build_button(label_text: String, action: Callable, btn_variant: GameMenuBut
 	btn.text = label_text
 	btn.set_variant(btn_variant)
 	btn.pressed.connect(action)
+	FontManager.apply(btn, FontManager.Type.BODY_BOLD, 10, Color.WHITE)
 	return btn
 
 
-func apply_font(label: Label, font_size: int, color: Color) -> void:
-	if custom_font:
-		label.add_theme_font_override("font", custom_font)
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-
-
 # ========================================
-# EVENT HANDLERS (DENGAN TRANSISI & AUDIO)
+# EVENT HANDLERS (TRANSISI & AUDIO)
 # ========================================
 
 func _on_play_pressed() -> void:
-	# Hentikan musik menu secara halus ketika masuk ke Gameplay
 	AudioManager.stop_bgm(0.5)
 	TransitionManager.change_scene(GAME_SCENE_PATH, 0.5)
 
@@ -133,7 +120,7 @@ func _on_load_pressed() -> void:
 	if ResourceLoader.exists(LOAD_SCENE_PATH):
 		TransitionManager.change_scene(LOAD_SCENE_PATH, FADE_DURATION)
 	else:
-		print("[Menu] Scene LoadGame belum dibuat.")
+		print("[Menu] Scene LoadGame belum ditemukan.")
 
 func _on_settings_pressed() -> void:
 	TransitionManager.change_scene(SETTINGS_SCENE_PATH, FADE_DURATION)
