@@ -1,11 +1,10 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/prologue/Prologue.gd" id="1_prologue"]
 [ext_resource type="PackedScene" path="res://scenes/entities/player/Player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://scenes/entities/interactables/Door.tscn" id="3_door"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud/HUD.tscn" id="4_hud"]
-[ext_resource type="PackedScene" path="res://scenes/entities/interactables/SavePoint.tscn" id="5_savepoint"]
-[ext_resource type="PackedScene" path="res://scenes/ui/components/SaveModal.tscn" id="6_savemodal"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud/HUD.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/entities/interactables/SavePoint.tscn" id="4_savepoint"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/SaveModal.tscn" id="5_savemodal"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
 size = Vector2(640, 16)
@@ -16,12 +15,12 @@ size = Vector2(16, 360)
 [node name="Prologue" type="Node2D"]
 script = ExtResource("1_prologue")
 
-[node name="HUD" parent="." instance=ExtResource("4_hud")]
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 layer = 20
 
-[node name="SaveModal" parent="UILayer" instance=ExtResource("6_savemodal")]
+[node name="SaveModal" parent="UILayer" instance=ExtResource("5_savemodal")]
 
 [node name="WorldEnvironment" type="CanvasModulate" parent="."]
 color = Color(0, 0, 0, 1)
@@ -54,12 +53,7 @@ shape = SubResource("RectangleShape2D_wall_v")
 position = Vector2(312, 0)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="DoorExit" parent="." instance=ExtResource("3_door")]
-position = Vector2(0, -150)
-target_scene = "res://scenes/ui/screens/main_menu/MainMenu.tscn"
-door_name = "KEMBALI KE STUDIO"
-
-[node name="SavePoint" parent="." instance=ExtResource("5_savepoint")]
+[node name="SavePoint" parent="." instance=ExtResource("4_savepoint")]
 position = Vector2(140, -50)
 station_name = "TERMINAL REKAMAN"
 
