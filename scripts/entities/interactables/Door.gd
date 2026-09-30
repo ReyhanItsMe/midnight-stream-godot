@@ -75,7 +75,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_player_in_range or is_any_door_teleporting:
+	# Abaikan input pintu jika player di luar jangkauan, sedang transisi, atau sedang dialog
+	if not is_player_in_range or is_any_door_teleporting or DialogueBox.is_dialogue_open:
 		return
 
 	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and event.keycode == KEY_E):
@@ -83,7 +84,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func interact() -> void:
-	if is_any_door_teleporting:
+	# Kunci interaksi total saat dialog sedang berjalan
+	if is_any_door_teleporting or DialogueBox.is_dialogue_open:
 		return
 
 	if is_locked:
@@ -117,6 +119,7 @@ func _start_door_transition() -> void:
 	tween.tween_interval(0.35)
 	tween.tween_callback(func(): is_any_door_teleporting = false)
 
+
 func _execute_teleport() -> void:
 	if target_scene != "":
 		if SaveManager and SaveManager.current_data.has("player"):
@@ -139,6 +142,7 @@ func _execute_teleport() -> void:
 		current_player_ref.current_direction = spawn_direction
 		if current_player_ref.has_method("_update_held_item"):
 			current_player_ref._update_held_item(spawn_direction, 1)
+
 
 func _update_sprite_texture() -> void:
 	if not sprite:
@@ -180,7 +184,8 @@ func _on_body_entered(body: Node2D) -> void:
 	if body is Player:
 		is_player_in_range = true
 		current_player_ref = body
-		if auto_teleport_on_touch and not is_any_door_teleporting:
+		# Tolak auto-teleportasi jika sedang dialog atau sedang transisi pintu lain
+		if auto_teleport_on_touch and not is_any_door_teleporting and not DialogueBox.is_dialogue_open:
 			interact()
 
 

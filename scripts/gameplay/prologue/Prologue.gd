@@ -6,12 +6,18 @@ const COLOR_TILE_B: Color = Color(0.16, 0.18, 0.24)
 const COLOR_TILE_BORDER: Color = Color(0.12, 0.13, 0.18)
 
 const DOOR_SCENE_PATH: String = "res://scenes/entities/interactables/Door.tscn"
+const MYSTERY_SPRITE_PATH: String = "res://assets/sprites/characters/mistery/misterius_sprite.png"
 
 @onready var player: Player = $Player
 @onready var camera: Camera2D = $Camera2D
 @onready var floor_rect: TextureRect = $GridFloor/FloorTiles
 @onready var save_point: SavePoint = $SavePoint
 @onready var save_modal: SaveModal = $UILayer/SaveModal
+
+var dialogue_box: DialogueBox
+var pause_modal: PauseModal
+var btn_talk_prompt: GameMenuButton
+var is_near_mystery_npc: bool = false
 
 func _ready() -> void:
 	AudioManager.stop_bgm(0.4)
@@ -20,14 +26,26 @@ func _ready() -> void:
 	_setup_horizontal_darkness_gradient()
 	_create_darkness_markers()
 	_create_test_doors()
+	_spawn_mystery_npc(Vector2(-60, -10))
 
-	var pause_modal := PauseModal.new()
+	# 1. Pasang Tombol Prompt Interaksi Bicara (Layer UI Dasar)
+	_create_talk_prompt_button()
+
+	# 2. Pasang Dialogue Box (Z-Index 5 agar di atas tombol prompt dunia)
+	dialogue_box = DialogueBox.new()
+	dialogue_box.name = "DialogueBox"
+	dialogue_box.z_index = 5
+	dialogue_box.dialogue_finished.connect(_on_dialogue_finished)
+	$UILayer.add_child(dialogue_box)
+
+	# 3. Pasang Pause Modal (Z-Index 10 agar tombol || PAUSE selalu bisa ditekan di atas blocker dialog)
+	pause_modal = PauseModal.new()
 	pause_modal.name = "PauseModal"
+	pause_modal.z_index = 10
 	$UILayer.add_child(pause_modal)
 
 	if player:
-		# Posisikan player di depan pintu kayu area terang
-		player.global_position = Vector2(-180, -40)
+		player.global_position = Vector2(-180, -20)
 		camera.global_position = player.global_position
 
 	if save_point and save_modal:
@@ -39,21 +57,139 @@ func _process(_delta: float) -> void:
 		camera.global_position = player.global_position
 
 
-## 1. Visual Dinding Struktural (Atas, Bawah, Kiri, Kanan)
+func _unhandled_input(event: InputEvent) -> void:
+	if is_near_mystery_npc and dialogue_box and not dialogue_box.is_active:
+		if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and event.keycode == KEY_E):
+			_start_mystery_conversation()
+			get_viewport().set_input_as_handled()
+
+
+# ==============================================================================
+# NPC MISTERIUS & TOMBOL PEMICU DIALOG
+# ==============================================================================
+
+func _spawn_mystery_npc(spawn_pos: Vector2) -> void:
+	var npc_area := Area2D.new()
+	npc_area.name = "MysteryNPC"
+	npc_area.position = spawn_pos
+	npc_area.collision_layer = 3
+	npc_area.collision_mask = 3
+	add_child(npc_area)
+
+	var spr := Sprite2D.new()
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	if ResourceLoader.exists(MYSTERY_SPRITE_PATH):
+		spr.texture = load(MYSTERY_SPRITE_PATH)
+	npc_area.add_child(spr)
+
+	var static_body := StaticBody2D.new()
+	var body_col := CollisionShape2D.new()
+	var body_rect := RectangleShape2D.new()
+	body_rect.size = Vector2(20, 24)
+	body_col.shape = body_rect
+	static_body.add_child(body_col)
+	npc_area.add_child(static_body)
+
+	var trigger_col := CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = 38.0
+	trigger_col.shape = circle
+	npc_area.add_child(trigger_col)
+
+	npc_area.body_entered.connect(func(body: Node2D):
+		if body is Player:
+			is_near_mystery_npc = true
+			_set_talk_prompt_visible(true)
+	)
+	npc_area.body_exited.connect(func(body: Node2D):
+		if body is Player:
+			is_near_mystery_npc = false
+			_set_talk_prompt_visible(false)
+	)
+
+
+func _create_talk_prompt_button() -> void:
+	btn_talk_prompt = GameMenuButton.new()
+	btn_talk_prompt.text = "[ E ] AJAK BICARA"
+	btn_talk_prompt.set_dimensions(136, 24)
+	btn_talk_prompt.font_size_override = 9
+	btn_talk_prompt.set_variant(GameMenuButton.Variant.ACCENT)
+	btn_talk_prompt.position = Vector2((640 - 136) / 2.0, 295)
+	btn_talk_prompt.visible = false
+	btn_talk_prompt.modulate.a = 0.0
+	btn_talk_prompt.pressed.connect(_start_mystery_conversation)
+	$UILayer.add_child(btn_talk_prompt)
+
+
+func _set_talk_prompt_visible(show_btn: bool) -> void:
+	if not btn_talk_prompt:
+		return
+
+	if show_btn and (not dialogue_box or not dialogue_box.is_active):
+		btn_talk_prompt.visible = true
+		var tw := create_tween()
+		tw.tween_property(btn_talk_prompt, "modulate:a", 1.0, 0.15)
+	else:
+		var tw := create_tween()
+		tw.tween_property(btn_talk_prompt, "modulate:a", 0.0, 0.12)
+		tw.tween_callback(func(): btn_talk_prompt.visible = false)
+
+
+func _start_mystery_conversation() -> void:
+	if not dialogue_box or dialogue_box.is_active:
+		return
+
+	_set_talk_prompt_visible(false)
+
+	dialogue_box.start_dialogue([
+		{
+			"speaker": "Rian",
+			"side": "left",
+			"expression": "cemas",
+			"text": "Permisi?! Ada orang di sini? Sinyal live stream-ku mendadak putus sejak masuk ke lorong ini."
+		},
+		{
+			"speaker": "Sosok Misterius",
+			"side": "right",
+			"expression": "biasa",
+			"text": "Matikan kamera itu... Sesuatu di balik pintu ujung sedang mendengarkan langkah kakimu."
+		},
+		{
+			"speaker": "Rian",
+			"side": "left",
+			"expression": "takut",
+			"text": "A-apa maksudmu? Semua pintu di ruangan ini malah membawaku berputar-putar!"
+		},
+		{
+			"speaker": "Sosok Misterius",
+			"side": "right",
+			"expression": "biasa",
+			"text": "Simpan rekamanmu di terminal sebelum sentermu redup. Jangan percaya pada pintu yang mengintip."
+		}
+	])
+
+
+func _on_dialogue_finished() -> void:
+	if is_near_mystery_npc:
+		_set_talk_prompt_visible(true)
+
+
+# ==============================================================================
+# ENVIRONMENT, DINDING, GRADASI CAHAYA & PINTU
+# ==============================================================================
+
 func _create_visual_walls() -> void:
 	var wall_container := Node2D.new()
 	wall_container.name = "VisualWalls"
-	wall_container.z_index = 2 # Di atas lantai dan sejajar dinding
+	wall_container.z_index = 2
 	add_child(wall_container)
 
-	# Dinding Atas (Tinggi 40px menutupi batas Y=-180 sampai Y=-140)
 	var wall_top := ColorRect.new()
 	wall_top.position = Vector2(-320, -180)
 	wall_top.size = Vector2(640, 42)
 	wall_top.color = Color(0.08, 0.09, 0.13, 1.0)
 	wall_container.add_child(wall_top)
 
-	# Garis lis penahan dinding atas (skirting board)
 	var skirting_top := ColorRect.new()
 	skirting_top.position = Vector2(-320, -138)
 	skirting_top.size = Vector2(640, 4)
@@ -61,7 +197,6 @@ func _create_visual_walls() -> void:
 	wall_container.add_child(skirting_top)
 
 
-## 2. Gradasi Cahaya Ruangan: Terang di Kiri -> Hitam Total di Kanan
 func _setup_horizontal_darkness_gradient() -> void:
 	var ambient_light := PointLight2D.new()
 	ambient_light.name = "AmbientGradientLight"
@@ -72,11 +207,11 @@ func _setup_horizontal_darkness_gradient() -> void:
 	var grad := Gradient.new()
 	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.65, 0.85, 1.0])
 	grad.colors = PackedColorArray([
-		Color(0.65, 0.70, 0.85, 1.0), # X = -320 (Kiri terang)
-		Color(0.35, 0.40, 0.50, 1.0), # X = -100
-		Color(0.12, 0.14, 0.20, 1.0), # X = +100 (Remang pekat)
-		Color(0.03, 0.03, 0.05, 1.0), # X = +220 (Mendekati hitam)
-		Color(0.00, 0.00, 0.00, 1.0)  # X = +320 (Gelap total 100%)
+		Color(0.65, 0.70, 0.85, 1.0),
+		Color(0.35, 0.40, 0.50, 1.0),
+		Color(0.12, 0.14, 0.20, 1.0),
+		Color(0.03, 0.03, 0.05, 1.0),
+		Color(0.00, 0.00, 0.00, 1.0)
 	])
 
 	var grad_tex := GradientTexture2D.new()
@@ -91,7 +226,6 @@ func _setup_horizontal_darkness_gradient() -> void:
 	add_child(ambient_light)
 
 
-## 3. Marker Penguji Tingkat Kegelapan
 func _create_darkness_markers() -> void:
 	var markers: Array[Dictionary] = [
 		{"pos": Vector2(-220, 90), "col": Color(0.2, 0.85, 0.3),  "label": "TERANG (100%)"},
@@ -105,6 +239,8 @@ func _create_darkness_markers() -> void:
 	marker_container.name = "DarknessMarkers"
 	add_child(marker_container)
 
+	var font_mgr: Node = get_node_or_null("/root/FontManager")
+
 	for m in markers:
 		var box := ColorRect.new()
 		box.size = Vector2(18, 48)
@@ -117,11 +253,16 @@ func _create_darkness_markers() -> void:
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.position = m["pos"] + Vector2(-60, 28)
 		lbl.size = Vector2(120, 20)
-		lbl.add_theme_font_size_override("font_size", 9)
-		lbl.add_theme_color_override("font_color", m["col"])
+
+		if font_mgr and font_mgr.has_method("apply"):
+			font_mgr.apply(lbl, font_mgr.Type.DIGITAL, 9, m["col"])
+		else:
+			lbl.add_theme_font_size_override("font_size", 9)
+			lbl.add_theme_color_override("font_color", m["col"])
+
 		marker_container.add_child(lbl)
 
-## 4. Spawn Pintu Horror Tepat di Atas Batas Lantai dengan Rute Berurutan
+
 func _create_test_doors() -> void:
 	if not ResourceLoader.exists(DOOR_SCENE_PATH):
 		push_warning("[Prologue] Scene Door tidak ditemukan di: " + DOOR_SCENE_PATH)
@@ -133,38 +274,33 @@ func _create_test_doors() -> void:
 	door_container.z_index = 3
 	add_child(door_container)
 
-	# Rute Teleportasi:
-	# Pintu 1 (-180) -> Spawn di depan Pintu 2 (-40)
-	# Pintu 2 (-40)  -> Spawn di depan Pintu 3 (100)
-	# Pintu 3 (100)  -> Spawn di depan Pintu 4 (230)
-	# Pintu 4 (230)  -> Kembali ke depan Pintu 1 (-180)
 	var doors_data: Array[Dictionary] = [
 		{
 			"pos": Vector2(-180, -130),
 			"type": Door.DoorType.KAYU_1DAUN,
 			"name": "1. PINTU KAYU (TERANG)",
-			"tp_pos": Vector2(-40, -30), # Teleport ke depan Pintu 2
+			"tp_pos": Vector2(-40, -30),
 			"spawn_dir": "depan"
 		},
 		{
 			"pos": Vector2(-40, -130),
 			"type": Door.DoorType.BESI_GANDA,
 			"name": "2. PINTU BESI GANDA (REMANG)",
-			"tp_pos": Vector2(100, -30), # Teleport ke depan Pintu 3
+			"tp_pos": Vector2(100, -30),
 			"spawn_dir": "depan"
 		},
 		{
 			"pos": Vector2(100, -130),
 			"type": Door.DoorType.RUMAH_SAKIT_1DAUN,
 			"name": "3. PINTU RUMAH SAKIT (GELAP)",
-			"tp_pos": Vector2(230, -30), # Teleport ke depan Pintu 4
+			"tp_pos": Vector2(230, -30),
 			"spawn_dir": "depan"
 		},
 		{
 			"pos": Vector2(230, -130),
 			"type": Door.DoorType.TERBUKA_MATA_1DAUN,
 			"name": "4. PINTU HOROR MATA (GELAP TOTAL)",
-			"tp_pos": Vector2(-180, -30), # Teleport kembali ke Pintu 1
+			"tp_pos": Vector2(-180, -30),
 			"spawn_dir": "depan"
 		}
 	]

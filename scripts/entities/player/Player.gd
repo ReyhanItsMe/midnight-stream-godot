@@ -105,6 +105,19 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# ==========================================================================
+	# KUNCI GERAKAN SAAT DIALOG BERLANGSUNG
+	# ==========================================================================
+	if DialogueBox.is_dialogue_open:
+		velocity = Vector2.ZERO
+		is_running = false
+		was_moving_last_frame = false
+		step_distance_accum = 0.0
+		_play_idle()
+		_sync_hand_and_light_instant(false)
+		move_and_slide()
+		return
+
 	# 1. Input Analog / Keyboard
 	var input_vector: Vector2 = joystick_vector
 	if input_vector == Vector2.ZERO:
