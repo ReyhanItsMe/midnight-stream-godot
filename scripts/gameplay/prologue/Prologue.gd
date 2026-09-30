@@ -14,9 +14,6 @@ const MYSTERY_SPRITE_PATH: String = "res://assets/sprites/characters/mistery/mis
 @onready var save_point: SavePoint = $SavePoint
 @onready var save_modal: SaveModal = $UILayer/SaveModal
 
-var dialogue_box: DialogueBox
-var pause_modal: PauseModal
-var btn_talk_prompt: GameMenuButton
 var is_near_mystery_npc: bool = false
 
 func _ready() -> void:
@@ -26,23 +23,9 @@ func _ready() -> void:
 	_setup_horizontal_darkness_gradient()
 	_create_darkness_markers()
 	_create_test_doors()
+	
+	# Spawn NPC di posisi yang sama
 	_spawn_mystery_npc(Vector2(-60, -10))
-
-	# 1. Pasang Tombol Prompt Interaksi Bicara (Layer UI Dasar)
-	_create_talk_prompt_button()
-
-	# 2. Pasang Dialogue Box (Z-Index 5 agar di atas tombol prompt dunia)
-	dialogue_box = DialogueBox.new()
-	dialogue_box.name = "DialogueBox"
-	dialogue_box.z_index = 5
-	dialogue_box.dialogue_finished.connect(_on_dialogue_finished)
-	$UILayer.add_child(dialogue_box)
-
-	# 3. Pasang Pause Modal (Z-Index 10 agar tombol || PAUSE selalu bisa ditekan di atas blocker dialog)
-	pause_modal = PauseModal.new()
-	pause_modal.name = "PauseModal"
-	pause_modal.z_index = 10
-	$UILayer.add_child(pause_modal)
 
 	if player:
 		player.global_position = Vector2(-180, -20)
@@ -58,14 +41,15 @@ func _process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_near_mystery_npc and dialogue_box and not dialogue_box.is_active:
-		if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and event.keycode == KEY_E):
+	if is_near_mystery_npc and HUD.instance and not HUD.instance.dialogue_box.is_active:
+		# FIX ERROR: Hanya mengecek tombol keyboard E secara murni
+		if event is InputEventKey and event.pressed and event.keycode == KEY_E:
 			_start_mystery_conversation()
 			get_viewport().set_input_as_handled()
 
 
 # ==============================================================================
-# NPC MISTERIUS & TOMBOL PEMICU DIALOG
+# NPC MISTERIUS & INTERAKSI DIALOG
 # ==============================================================================
 
 func _spawn_mystery_npc(spawn_pos: Vector2) -> void:
@@ -96,52 +80,27 @@ func _spawn_mystery_npc(spawn_pos: Vector2) -> void:
 	trigger_col.shape = circle
 	npc_area.add_child(trigger_col)
 
+	# Terhubung langsung ke HUD untuk memunculkan prompt tombol
 	npc_area.body_entered.connect(func(body: Node2D):
 		if body is Player:
 			is_near_mystery_npc = true
-			_set_talk_prompt_visible(true)
+			if HUD.instance:
+				HUD.instance.set_talk_prompt_visible(true, _start_mystery_conversation)
 	)
 	npc_area.body_exited.connect(func(body: Node2D):
 		if body is Player:
 			is_near_mystery_npc = false
-			_set_talk_prompt_visible(false)
+			if HUD.instance:
+				HUD.instance.set_talk_prompt_visible(false)
 	)
 
 
-func _create_talk_prompt_button() -> void:
-	btn_talk_prompt = GameMenuButton.new()
-	btn_talk_prompt.text = "[ E ] AJAK BICARA"
-	btn_talk_prompt.set_dimensions(136, 24)
-	btn_talk_prompt.font_size_override = 9
-	btn_talk_prompt.set_variant(GameMenuButton.Variant.ACCENT)
-	btn_talk_prompt.position = Vector2((640 - 136) / 2.0, 295)
-	btn_talk_prompt.visible = false
-	btn_talk_prompt.modulate.a = 0.0
-	btn_talk_prompt.pressed.connect(_start_mystery_conversation)
-	$UILayer.add_child(btn_talk_prompt)
-
-
-func _set_talk_prompt_visible(show_btn: bool) -> void:
-	if not btn_talk_prompt:
-		return
-
-	if show_btn and (not dialogue_box or not dialogue_box.is_active):
-		btn_talk_prompt.visible = true
-		var tw := create_tween()
-		tw.tween_property(btn_talk_prompt, "modulate:a", 1.0, 0.15)
-	else:
-		var tw := create_tween()
-		tw.tween_property(btn_talk_prompt, "modulate:a", 0.0, 0.12)
-		tw.tween_callback(func(): btn_talk_prompt.visible = false)
-
-
 func _start_mystery_conversation() -> void:
-	if not dialogue_box or dialogue_box.is_active:
+	if not HUD.instance or HUD.instance.dialogue_box.is_active:
 		return
 
-	_set_talk_prompt_visible(false)
-
-	dialogue_box.start_dialogue([
+	# Start Dialog melalui HUD
+	HUD.instance.start_dialogue([
 		{
 			"speaker": "Rian",
 			"side": "left",
@@ -166,16 +125,16 @@ func _start_mystery_conversation() -> void:
 			"expression": "biasa",
 			"text": "Simpan rekamanmu di terminal sebelum sentermu redup. Jangan percaya pada pintu yang mengintip."
 		}
-	])
+	], _on_dialogue_finished)
 
 
 func _on_dialogue_finished() -> void:
-	if is_near_mystery_npc:
-		_set_talk_prompt_visible(true)
+	if is_near_mystery_npc and HUD.instance:
+		HUD.instance.set_talk_prompt_visible(true, _start_mystery_conversation)
 
 
 # ==============================================================================
-# ENVIRONMENT, DINDING, GRADASI CAHAYA & PINTU
+# ENVIRONMENT & DINDING
 # ==============================================================================
 
 func _create_visual_walls() -> void:

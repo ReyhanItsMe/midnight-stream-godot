@@ -71,7 +71,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 # ==============================================================================
-# 1. TOMBOL PAUSE HUD (POJOK KANAN ATAS)
+# 1. TOMBOL PAUSE HUD (TENGAH ATAS - DENGAN TEKS)
 # ==============================================================================
 
 func _build_hud_pause_button() -> void:
@@ -80,10 +80,13 @@ func _build_hud_pause_button() -> void:
 	btn_pause_hud.set_dimensions(68, 22)
 	btn_pause_hud.font_size_override = 9
 	btn_pause_hud.set_variant(GameMenuButton.Variant.DEFAULT)
-	btn_pause_hud.position = Vector2(VIEWPORT_RES.x - 80, 10)
+	
+	# PENTING: Pindahkan ke tengah atas layar (X di tengah resolusi 640, Y = 10)
+	btn_pause_hud.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	btn_pause_hud.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	btn_pause_hud.offset_top = 10
 	btn_pause_hud.pressed.connect(open_pause_menu)
 	add_child(btn_pause_hud)
-
 
 # ==============================================================================
 # 2. STRUKTUR MODAL UTAMA (SESUAI KONFIRMASI LOG & ARCHIVES)

@@ -3,10 +3,10 @@ class_name GameMenuButton
 
 # --- ENUMS ---
 enum Variant {
-	DEFAULT,   # Border abu-kebiruan, hover crimson horror
-	ACCENT,    # Border emas kusam
-	DANGER,    # Border merah darah
-	GHOST      # Tanpa background
+	DEFAULT,
+	ACCENT,
+	DANGER,
+	GHOST
 }
 
 enum IconAlignMode {
@@ -17,11 +17,7 @@ enum IconAlignMode {
 
 # --- CONSTANTS ---
 const DEFAULT_SFX_PATH: String = "res://assets/audio/sfx/sfx-click-button.mp3"
-
-# Kecepatan Playback SFX (1.35 = ~35% lebih cepat dan renyah)
 const SFX_PITCH_FAST: float = 1.35
-
-# Animasi Klik
 const CLICK_SCALE_DOWN: Vector2 = Vector2(0.95, 0.95)
 const CLICK_PIXEL_OFFSET_Y: float = 1.5
 const PRESS_TWEEN_DURATION: float = 0.06
@@ -74,7 +70,6 @@ func _ready() -> void:
 	_setup_icon()
 	_setup_audio()
 
-	# Signal animasi tombol
 	button_down.connect(_on_button_down_anim)
 	button_up.connect(_on_button_up_anim)
 	pressed.connect(_on_pressed_internal)
@@ -84,27 +79,21 @@ func _update_pivot() -> void:
 	pivot_offset = custom_minimum_size / 2.0
 
 
-# ==============================================================================
-# CONFIGURATION HELPERS
-# ==============================================================================
-
 func set_dimensions(width: float, height: float) -> GameMenuButton:
 	self.button_size = Vector2(width, height)
 	return self
+
 
 func set_icon_texture(texture: Texture2D, align: IconAlignMode = IconAlignMode.LEFT) -> GameMenuButton:
 	self.icon_texture = texture
 	self.icon_alignment_mode = align
 	return self
 
+
 func set_variant(new_variant: Variant) -> GameMenuButton:
 	self.variant = new_variant
 	return self
 
-
-# ==============================================================================
-# ANIMASI TEKAN / KLIK (PRESS & RELEASE TWEEN)
-# ==============================================================================
 
 func _on_button_down_anim() -> void:
 	if anim_tween and anim_tween.is_valid():
@@ -124,13 +113,15 @@ func _on_button_up_anim() -> void:
 	anim_tween.tween_property(self, "position:y", position.y - CLICK_PIXEL_OFFSET_Y, RELEASE_TWEEN_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 
-# ==============================================================================
-# FONT & THEME STYLING
-# ==============================================================================
-
 func _update_font() -> void:
-	if Engine.has_singleton("FontManager") or get_node_or_null("/root/FontManager") != null:
-		FontManager.apply(self, FontManager.Type.BODY_BOLD, font_size_override, Color(0.9, 0.92, 0.95))
+	# FIX: Cegah error spam pencarian node sebelum masuk scene tree
+	if not is_inside_tree():
+		add_theme_font_size_override("font_size", font_size_override)
+		return
+		
+	var font_mgr: Node = get_node_or_null("/root/FontManager")
+	if font_mgr and font_mgr.has_method("apply"):
+		font_mgr.apply(self, 1, font_size_override, Color(0.9, 0.92, 0.95))
 	else:
 		add_theme_font_size_override("font_size", font_size_override)
 
@@ -198,17 +189,12 @@ func _apply_theme_styles() -> void:
 	add_theme_stylebox_override("focus", style_normal)
 
 
-# ==============================================================================
-# AUDIO (CLICK SFX SPEEDUP)
-# ==============================================================================
-
 func _setup_audio() -> void:
 	if not enable_sfx:
 		return
 
 	sfx_player = AudioStreamPlayer.new()
 	sfx_player.bus = "SFX"
-	# Menaikkan pitch scale agar durasi playback lebih pendek dan instan
 	sfx_player.pitch_scale = SFX_PITCH_FAST
 
 	if custom_sfx:
@@ -221,6 +207,5 @@ func _setup_audio() -> void:
 
 func _on_pressed_internal() -> void:
 	if enable_sfx and sfx_player and sfx_player.stream:
-		# Restart SFX jika diklik beruntun tanpa terpotong error
 		sfx_player.stop()
 		sfx_player.play()

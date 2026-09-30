@@ -1,4 +1,7 @@
 extends CanvasLayer
+class_name HUD
+
+static var instance: HUD
 
 # --- RESOURCE PATHS ---
 const FONT_PATH: String = "res://assets/fonts/Pix32.ttf"
@@ -41,6 +44,22 @@ var joystick_knob: Panel
 var joystick_touch_index: int = -1
 var joystick_center: Vector2 = Vector2.ZERO
 
+# --- UI MODALS & MENUS ---
+var pause_modal: PauseModal
+var inventory_modal: InventoryModal
+var dialogue_box: DialogueBox
+
+var btn_bag: GameMenuButton
+var hotbar_slots_ui: Array[PanelContainer] = []
+
+var btn_talk_prompt: GameMenuButton
+var current_talk_callable: Callable
+
+
+func _enter_tree() -> void:
+	instance = self
+
+
 func _ready() -> void:
 	layer = HUD_LAYER_INDEX
 
@@ -52,12 +71,23 @@ func _ready() -> void:
 	_build_interaction_prompt()
 	_build_virtual_joystick()
 	_build_touch_controls()
+	
+	_build_top_right_menu()
+	_build_talk_prompt()
+	
+	_init_modals()
 
 	if SaveManager:
 		SaveManager.sanity_changed.connect(_on_sanity_changed)
 		SaveManager.sanity_critical.connect(_on_sanity_critical)
 		var init_sanity: float = SaveManager.get_current_sanity() if SaveManager.has_method("get_current_sanity") else SaveManager.MAX_SANITY
 		_on_sanity_changed(init_sanity, SaveManager.MAX_SANITY)
+		
+	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
+	if inv_mgr:
+		inv_mgr.hotbar_updated.connect(_refresh_hotbar)
+		_refresh_hotbar()
+
 
 func _process(_delta: float) -> void:
 	if stamina_bar:
@@ -81,46 +111,138 @@ func _process(_delta: float) -> void:
 		hide_prompt()
 
 
-# ==============================================================================
-# VIRTUAL ANALOG JOYSTICK
-# ==============================================================================
+func _init_modals() -> void:
+	dialogue_box = DialogueBox.new()
+	dialogue_box.name = "DialogueBox"
+	dialogue_box.z_index = 5
+	add_child(dialogue_box)
 
-func _build_virtual_joystick() -> void:
-	var base_diameter: float = JOYSTICK_BASE_RADIUS * 2.0
-	var knob_diameter: float = JOYSTICK_KNOB_RADIUS * 2.0
+	inventory_modal = InventoryModal.new()
+	inventory_modal.name = "InventoryModal"
+	inventory_modal.z_index = 9
+	add_child(inventory_modal)
+	
+	if inventory_modal.get("hud_bag_btn") != null:
+		inventory_modal.hud_bag_btn.queue_free()
+		inventory_modal.hud_bag_btn = self.btn_bag
 
-	joystick_base = Panel.new()
-	joystick_base.custom_minimum_size = Vector2(base_diameter, base_diameter)
-	joystick_base.size = Vector2(base_diameter, base_diameter)
-	joystick_base.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	joystick_base.offset_left = 20
-	joystick_base.offset_top = -24 - base_diameter
-	joystick_base.offset_right = 20 + base_diameter
-	joystick_base.offset_bottom = -24
+	pause_modal = PauseModal.new()
+	pause_modal.name = "PauseModal"
+	pause_modal.z_index = 10
+	add_child(pause_modal)
 
-	var base_style := StyleBoxFlat.new()
-	base_style.bg_color = Color(0.06, 0.08, 0.12, 0.55)
-	base_style.set_border_width_all(1)
-	base_style.border_color = Color(0.45, 0.52, 0.65, 0.65)
-	base_style.set_corner_radius_all(int(JOYSTICK_BASE_RADIUS))
-	joystick_base.add_theme_stylebox_override("panel", base_style)
-	add_child(joystick_base)
 
-	joystick_knob = Panel.new()
-	joystick_knob.custom_minimum_size = Vector2(knob_diameter, knob_diameter)
-	joystick_knob.size = Vector2(knob_diameter, knob_diameter)
-	joystick_knob.position = Vector2(
-		JOYSTICK_BASE_RADIUS - JOYSTICK_KNOB_RADIUS,
-		JOYSTICK_BASE_RADIUS - JOYSTICK_KNOB_RADIUS
+func _build_top_right_menu() -> void:
+	var hbox := HBoxContainer.new()
+	
+	# Menggunakan anchor agar selalu di ujung kanan
+	hbox.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	hbox.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hbox.offset_right = -12
+	hbox.offset_top = 10
+	
+	hbox.alignment = BoxContainer.ALIGNMENT_END
+	hbox.add_theme_constant_override("separation", 8)
+	add_child(hbox)
+	
+	var hotbar_hbox := HBoxContainer.new()
+	hotbar_hbox.add_theme_constant_override("separation", 4)
+	hbox.add_child(hotbar_hbox)
+	
+	hotbar_slots_ui.clear()
+	for i in range(3):
+		var box := PanelContainer.new()
+		box.custom_minimum_size = Vector2(26, 26)
+		var st := StyleBoxFlat.new()
+		st.bg_color = Color(0.04, 0.05, 0.08, 0.8)
+		st.set_border_width_all(1)
+		st.border_color = COLOR_PANEL_BORDER
+		box.add_theme_stylebox_override("panel", st)
+		
+		var icon := TextureRect.new()
+		icon.name = "Icon"
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		box.add_child(icon)
+		
+		hotbar_hbox.add_child(box)
+		hotbar_slots_ui.append(box)
+	
+	btn_bag = GameMenuButton.new()
+	# FIX: Add child sebelum mengatur properti
+	hbox.add_child(btn_bag)
+	
+	btn_bag.text = "[ TAS ]"
+	btn_bag.set_dimensions(54, 26)
+	btn_bag.font_size_override = 9
+	btn_bag.set_variant(GameMenuButton.Variant.DEFAULT)
+	btn_bag.pressed.connect(func():
+		if inventory_modal and not dialogue_box.is_active:
+			if inventory_modal.has_method("open"):
+				inventory_modal.open()
 	)
 
-	var knob_style := StyleBoxFlat.new()
-	knob_style.bg_color = Color(0.85, 0.88, 0.95, 0.75)
-	knob_style.set_border_width_all(1)
-	knob_style.border_color = COLOR_PROMPT_GOLD
-	knob_style.set_corner_radius_all(int(JOYSTICK_KNOB_RADIUS))
-	joystick_knob.add_theme_stylebox_override("panel", knob_style)
-	joystick_base.add_child(joystick_knob)
+
+func _refresh_hotbar() -> void:
+	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
+	if not inv_mgr: return
+	
+	for i in range(hotbar_slots_ui.size()):
+		var box: PanelContainer = hotbar_slots_ui[i]
+		var icon: TextureRect = box.get_node("Icon")
+		
+		if i < inv_mgr.hotbar.size() and inv_mgr.hotbar[i].has("id"):
+			var item_id: String = inv_mgr.hotbar[i]["id"]
+			var meta: Dictionary = inv_mgr.get_item_meta(item_id)
+			var path: String = meta.get("icon_path", "")
+			if path != "" and ResourceLoader.exists(path):
+				icon.texture = load(path)
+			else:
+				icon.texture = null
+			box.get_theme_stylebox("panel").border_color = COLOR_PROMPT_GOLD
+		else:
+			icon.texture = null
+			box.get_theme_stylebox("panel").border_color = COLOR_PANEL_BORDER
+
+
+func _build_talk_prompt() -> void:
+	btn_talk_prompt = GameMenuButton.new()
+	add_child(btn_talk_prompt)
+	
+	btn_talk_prompt.text = "[ E ] AJAK BICARA"
+	btn_talk_prompt.set_dimensions(136, 24)
+	btn_talk_prompt.font_size_override = 9
+	btn_talk_prompt.set_variant(GameMenuButton.Variant.ACCENT)
+	btn_talk_prompt.position = Vector2((640 - 136) / 2.0, 295)
+	btn_talk_prompt.visible = false
+	btn_talk_prompt.modulate.a = 0.0
+	btn_talk_prompt.pressed.connect(func():
+		if current_talk_callable.is_valid():
+			current_talk_callable.call()
+	)
+
+
+func set_talk_prompt_visible(show_btn: bool, callable: Callable = Callable()) -> void:
+	if not btn_talk_prompt: return
+	
+	if show_btn and (not dialogue_box or not dialogue_box.is_active):
+		current_talk_callable = callable
+		btn_talk_prompt.visible = true
+		var tw := create_tween()
+		tw.tween_property(btn_talk_prompt, "modulate:a", 1.0, 0.15)
+	else:
+		var tw := create_tween()
+		tw.tween_property(btn_talk_prompt, "modulate:a", 0.0, 0.12)
+		tw.tween_callback(func(): btn_talk_prompt.visible = false)
+
+
+func start_dialogue(lines: Array[Dictionary], callback: Callable = Callable()) -> void:
+	if dialogue_box:
+		set_talk_prompt_visible(false)
+		dialogue_box.start_dialogue(lines)
+		if callback.is_valid():
+			if not dialogue_box.dialogue_finished.is_connected(callback):
+				dialogue_box.dialogue_finished.connect(callback, CONNECT_ONE_SHOT)
 
 
 func _input(event: InputEvent) -> void:
@@ -183,9 +305,43 @@ func _reset_joystick() -> void:
 		).set_trans(Tween.TRANS_QUAD)
 
 
-# ==============================================================================
-# UI COMPONENTS
-# ==============================================================================
+func _build_virtual_joystick() -> void:
+	var base_diameter: float = JOYSTICK_BASE_RADIUS * 2.0
+	var knob_diameter: float = JOYSTICK_KNOB_RADIUS * 2.0
+
+	joystick_base = Panel.new()
+	joystick_base.custom_minimum_size = Vector2(base_diameter, base_diameter)
+	joystick_base.size = Vector2(base_diameter, base_diameter)
+	joystick_base.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	joystick_base.offset_left = 20
+	joystick_base.offset_top = -24 - base_diameter
+	joystick_base.offset_right = 20 + base_diameter
+	joystick_base.offset_bottom = -24
+
+	var base_style := StyleBoxFlat.new()
+	base_style.bg_color = Color(0.06, 0.08, 0.12, 0.55)
+	base_style.set_border_width_all(1)
+	base_style.border_color = Color(0.45, 0.52, 0.65, 0.65)
+	base_style.set_corner_radius_all(int(JOYSTICK_BASE_RADIUS))
+	joystick_base.add_theme_stylebox_override("panel", base_style)
+	add_child(joystick_base)
+
+	joystick_knob = Panel.new()
+	joystick_knob.custom_minimum_size = Vector2(knob_diameter, knob_diameter)
+	joystick_knob.size = Vector2(knob_diameter, knob_diameter)
+	joystick_knob.position = Vector2(
+		JOYSTICK_BASE_RADIUS - JOYSTICK_KNOB_RADIUS,
+		JOYSTICK_BASE_RADIUS - JOYSTICK_KNOB_RADIUS
+	)
+
+	var knob_style := StyleBoxFlat.new()
+	knob_style.bg_color = Color(0.85, 0.88, 0.95, 0.75)
+	knob_style.set_border_width_all(1)
+	knob_style.border_color = COLOR_PROMPT_GOLD
+	knob_style.set_corner_radius_all(int(JOYSTICK_KNOB_RADIUS))
+	joystick_knob.add_theme_stylebox_override("panel", knob_style)
+	joystick_base.add_child(joystick_knob)
+
 
 func _build_stamina_bottom_bar() -> void:
 	stamina_bar = ProgressBar.new()

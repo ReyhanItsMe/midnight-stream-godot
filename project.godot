@@ -22,6 +22,7 @@ AudioManager="*res://scripts/core/AudioManager.gd"
 SaveManager="*res://scripts/core/SaveManager.gd"
 TransitionManager="*res://scripts/core/TransitionManager.gd"
 InteractionManager="*res://scripts/core/InteractionManager.gd"
+InventoryManager="*res://scripts/core/InventoryManager.gd"
 
 [display]
 

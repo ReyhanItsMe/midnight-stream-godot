@@ -4,7 +4,7 @@ extends Node
 signal sanity_changed(new_sanity: float, max_sanity: float)
 signal sanity_depleted
 signal sanity_critical(is_critical: bool)
-signal inventory_updated(keys: Array, has_flashlight: bool, battery: float)
+signal inventory_synced
 
 # --- CONSTANTS ---
 const SETTINGS_FILE_PATH: String = "user://settings.json"
@@ -24,8 +24,8 @@ var default_data: Dictionary = {
 		"scene_path": DEFAULT_GAMEPLAY_SCENE
 	},
 	"player": {
-		"position_x": 0.0,
-		"position_y": 20.0,
+		"position_x": -180.0,
+		"position_y": -20.0,
 		"last_direction": "depan",
 		"sanity": 100.0,
 		"max_sanity": 100.0
@@ -33,7 +33,9 @@ var default_data: Dictionary = {
 	"inventory": {
 		"has_flashlight": true,
 		"flashlight_battery": 100.0,
-		"keys": []
+		"items": [],       # 8 Slot Tas Utama: [{"id": "kunci_bangsal_timur", "amount": 1}, ...]
+		"hotbar": [],      # 3 Quick-Slot: [{"id": "baterai_senter", "amount": 1}, ...]
+		"current_weight": 0.0
 	},
 	"story_flags": {
 		"chapter": 1,
@@ -60,12 +62,80 @@ func _ready() -> void:
 	load_settings()
 	apply_audio_settings()
 
+
 func _process(delta: float) -> void:
 	play_time_timer += delta
 	if play_time_timer >= 1.0:
 		play_time_timer -= 1.0
 		if current_data.has("meta"):
 			current_data["meta"]["play_time_seconds"] = current_data["meta"].get("play_time_seconds", 0) + 1
+
+
+# ==============================================================================
+# INTEGRASI DATA DENGAN INVENTORYMANAGER
+# ==============================================================================
+
+## Menarik data runtime terbaru dari InventoryManager sebelum disimpan ke file
+func _sync_from_inventory_manager() -> void:
+	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
+	if not inv_mgr:
+		return
+
+	if not current_data.has("inventory"):
+		current_data["inventory"] = {}
+
+	# Salin slot tas, hotbar, dan berat terkini
+	current_data["inventory"]["items"] = inv_mgr.inventory.duplicate(true)
+	current_data["inventory"]["hotbar"] = inv_mgr.hotbar.duplicate(true)
+	current_data["inventory"]["current_weight"] = inv_mgr.current_weight
+
+
+## Mendorong data yang baru di-load ke InventoryManager runtime
+func _push_to_inventory_manager() -> void:
+	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
+	if not inv_mgr:
+		return
+
+	var inv_data: Dictionary = current_data.get("inventory", {})
+	var saved_items: Array = inv_data.get("items", [])
+	var saved_hotbar: Array = inv_data.get("hotbar", [])
+
+	# Jika slot kosong atau baru mulai game
+	if saved_items.is_empty():
+		inv_mgr._initialize_empty_slots()
+	else:
+		inv_mgr.inventory = saved_items.duplicate(true)
+
+	if not saved_hotbar.is_empty():
+		inv_mgr.hotbar = saved_hotbar.duplicate(true)
+
+	# Hitung ulang bobot tas
+	if inv_mgr.has_method("_recalculate_weight"):
+		inv_mgr._recalculate_weight()
+
+	inventory_synced.emit()
+
+
+## Wrapper penambah item agar kompatibel dengan sistem lama
+func add_item_to_inventory(item_id: String, amount: int = 1) -> bool:
+	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
+	if inv_mgr and inv_mgr.has_method("add_item"):
+		var res: bool = inv_mgr.add_item(item_id, amount)
+		_sync_from_inventory_manager()
+		return res
+	return false
+
+
+## Wrapper cek kunci untuk Door.gd
+func has_key(key_id: String) -> bool:
+	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
+	if inv_mgr and inv_mgr.has_method("has_item"):
+		return inv_mgr.has_item(key_id)
+	return false
+
+
+func set_flashlight_battery(val: float) -> void:
+	current_data["inventory"]["flashlight_battery"] = clampf(val, 0.0, MAX_BATTERY)
 
 
 # ==============================================================================
@@ -113,26 +183,6 @@ func _check_sanity_status(val: float) -> void:
 
 
 # ==============================================================================
-# SISTEM INVENTORY & ITEM STORY
-# ==============================================================================
-
-func add_key(key_id: String) -> void:
-	var keys: Array = current_data["inventory"]["keys"]
-	if not key_id in keys:
-		keys.append(key_id)
-		inventory_updated.emit(keys, current_data["inventory"]["has_flashlight"], current_data["inventory"]["flashlight_battery"])
-
-
-func has_key(key_id: String) -> bool:
-	return key_id in current_data["inventory"]["keys"]
-
-
-func set_flashlight_battery(val: float) -> void:
-	current_data["inventory"]["flashlight_battery"] = clampf(val, 0.0, MAX_BATTERY)
-	inventory_updated.emit(current_data["inventory"]["keys"], current_data["inventory"]["has_flashlight"], current_data["inventory"]["flashlight_battery"])
-
-
-# ==============================================================================
 # SISTEM 20 SLOT RECOVERY LOG
 # ==============================================================================
 
@@ -144,22 +194,23 @@ func has_slot_file(slot_index: int) -> bool:
 	return FileAccess.file_exists(get_slot_path(slot_index))
 
 
-func get_slot_summary(slot_index: int) -> String:
+func get_slot_info(slot_index: int) -> Dictionary:
 	if not has_slot_file(slot_index):
-		return "EMPTY ARCHIVE SLOT"
+		return {"exists": false}
 
 	var file := FileAccess.open(get_slot_path(slot_index), FileAccess.READ)
 	if not file:
-		return "CORRUPTED LOG"
+		return {"exists": false}
 
 	var json := JSON.new()
 	if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
 		var meta: Dictionary = json.data.get("meta", {})
-		var title: String = meta.get("chapter_title", "SANATORIUM LOG")
-		var date_str: String = meta.get("save_date", "")
-		return "%s [%s]" % [title, date_str] if date_str != "" else title
-
-	return "EMPTY ARCHIVE SLOT"
+		return {
+			"exists": true,
+			"location": meta.get("chapter_title", "SANATORIUM LOG"),
+			"timestamp": meta.get("save_date", "")
+		}
+	return {"exists": false}
 
 
 func get_saved_scene_path() -> String:
@@ -177,6 +228,9 @@ func save_to_slot(slot_index: int = active_slot) -> bool:
 	var scene_now := get_tree().current_scene
 	if scene_now and scene_now.scene_file_path != "":
 		current_data["meta"]["scene_path"] = scene_now.scene_file_path
+
+	# Sinkronkan barang di inventory ke skema save
+	_sync_from_inventory_manager()
 
 	var file := FileAccess.open(get_slot_path(active_slot), FileAccess.WRITE)
 	if not file:
@@ -205,6 +259,9 @@ func load_from_slot(slot_index: int) -> bool:
 		current_data["settings"] = saved_settings
 		active_slot = slot_index
 
+		# Dorong data barang yang baru di-load kembali ke InventoryManager
+		_push_to_inventory_manager()
+
 		var cur_san: float = get_current_sanity()
 		is_in_critical_sanity = (cur_san <= CRITICAL_SANITY_THRESHOLD)
 		sanity_changed.emit(cur_san, MAX_SANITY)
@@ -223,7 +280,7 @@ func delete_slot(slot_index: int) -> bool:
 
 
 # ==============================================================================
-# SETTINGS PERSISTENCE & HARDWARE AUDIO SYNC
+# SETTINGS PERSISTENCE & AUDIO
 # ==============================================================================
 
 func save_game() -> bool:
@@ -252,7 +309,6 @@ func load_settings() -> void:
 		apply_audio_settings()
 
 
-## Menerapkan volume secara menyeluruh ke AudioServer Godot & AudioManager
 func apply_audio_settings() -> void:
 	var settings_dict: Dictionary = current_data.get("settings", {})
 	var raw_bgm = settings_dict.get("bgm_volume", 0.5)
@@ -285,4 +341,5 @@ func reset_to_new_game() -> void:
 	current_data = default_data.duplicate(true)
 	current_data["settings"] = saved_settings
 	is_in_critical_sanity = false
+	_push_to_inventory_manager()
 	sanity_changed.emit(MAX_SANITY, MAX_SANITY)
