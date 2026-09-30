@@ -482,7 +482,6 @@ func _get_slot_data(slot_idx: int) -> Dictionary:
 				}
 	return {"exists": false}
 
-
 func _execute_load_selected_slot() -> void:
 	var info := _get_slot_data(selected_slot)
 	if not info.get("exists", false):
@@ -494,14 +493,21 @@ func _execute_load_selected_slot() -> void:
 
 	if SaveManager and SaveManager.has_method("load_game"):
 		SaveManager.load_game(selected_slot)
-		var target_scene: String = SaveManager.current_data.get("current_scene", "")
-		if target_scene != "" and ResourceLoader.exists(target_scene):
-			get_tree().change_scene_to_file(target_scene)
+		
+		# Ambil path scene yang tersimpan (kompatibel dengan schema save_path atau scene_path)
+		var target_scene: String = ""
+		if SaveManager.has_method("get_saved_scene_path"):
+			target_scene = SaveManager.get_saved_scene_path()
 		else:
-			get_tree().reload_current_scene()
+			target_scene = SaveManager.current_data.get("meta", {}).get("scene_path", "")
+
+		# Pindah ke scene gameplay via loading screen beranimasi
+		if target_scene != "" and ResourceLoader.exists(target_scene):
+			TransitionManager.change_scene_with_loading(target_scene)
+		else:
+			TransitionManager.change_scene_with_loading(get_tree().current_scene.scene_file_path)
 	else:
 		get_tree().reload_current_scene()
-
 
 func _delete_selected_slot() -> void:
 	if SaveManager and SaveManager.has_method("delete_slot"):

@@ -305,7 +305,7 @@ func _on_load_pressed() -> void:
 		info_modal.popup("EMPTY LOG", "Slot #%d masih kosong. Tidak ada sinyal rekaman." % selected_slot)
 		return
 
-	var summary := SaveManager.get_slot_summary(selected_slot)
+	var summary: String = SaveManager.get_slot_summary(selected_slot)
 	info_modal.popup_confirm(
 		"KONFIRMASI MUAT LOG",
 		"Yakin ingin memuat rekaman ini?\n%s" % summary,
@@ -313,9 +313,10 @@ func _on_load_pressed() -> void:
 		false,
 		func():
 			if SaveManager.load_from_slot(selected_slot):
-				AudioManager.stop_bgm(0.5)
+				AudioManager.stop_bgm(0.4)
 				var target_scene_path: String = SaveManager.get_saved_scene_path()
-				TransitionManager.change_scene(target_scene_path, 0.5)
+				# Pindah scene via loading screen beranimasi
+				TransitionManager.change_scene_with_loading(target_scene_path)
 	)
 
 

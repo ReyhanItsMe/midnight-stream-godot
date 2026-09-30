@@ -113,8 +113,9 @@ func build_button(label_text: String, action: Callable, btn_variant: GameMenuBut
 # ========================================
 
 func _on_play_pressed() -> void:
-	AudioManager.stop_bgm(0.5)
-	TransitionManager.change_scene(GAME_SCENE_PATH, 0.5)
+	AudioManager.stop_bgm(0.4)
+	# Menggunakan layar loading beranimasi Rian lari + progress bar
+	TransitionManager.change_scene_with_loading(GAME_SCENE_PATH, FADE_DURATION)
 
 func _on_load_pressed() -> void:
 	if ResourceLoader.exists(LOAD_SCENE_PATH):

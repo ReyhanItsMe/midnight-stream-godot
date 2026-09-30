@@ -33,8 +33,8 @@ var default_data: Dictionary = {
 	"inventory": {
 		"has_flashlight": true,
 		"flashlight_battery": 100.0,
-		"items": [],       # 8 Slot Tas Utama: [{"id": "kunci_bangsal_timur", "amount": 1}, ...]
-		"hotbar": [],      # 3 Quick-Slot: [{"id": "baterai_senter", "amount": 1}, ...]
+		"items": [],
+		"hotbar": [],
 		"current_weight": 0.0
 	},
 	"story_flags": {
@@ -72,10 +72,9 @@ func _process(delta: float) -> void:
 
 
 # ==============================================================================
-# INTEGRASI DATA DENGAN INVENTORYMANAGER
+# INTEGRASI INVENTORY
 # ==============================================================================
 
-## Menarik data runtime terbaru dari InventoryManager sebelum disimpan ke file
 func _sync_from_inventory_manager() -> void:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
 	if not inv_mgr:
@@ -84,13 +83,11 @@ func _sync_from_inventory_manager() -> void:
 	if not current_data.has("inventory"):
 		current_data["inventory"] = {}
 
-	# Salin slot tas, hotbar, dan berat terkini
 	current_data["inventory"]["items"] = inv_mgr.inventory.duplicate(true)
 	current_data["inventory"]["hotbar"] = inv_mgr.hotbar.duplicate(true)
 	current_data["inventory"]["current_weight"] = inv_mgr.current_weight
 
 
-## Mendorong data yang baru di-load ke InventoryManager runtime
 func _push_to_inventory_manager() -> void:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
 	if not inv_mgr:
@@ -100,23 +97,22 @@ func _push_to_inventory_manager() -> void:
 	var saved_items: Array = inv_data.get("items", [])
 	var saved_hotbar: Array = inv_data.get("hotbar", [])
 
-	# Jika slot kosong atau baru mulai game
 	if saved_items.is_empty():
 		inv_mgr._initialize_empty_slots()
 	else:
-		inv_mgr.inventory = saved_items.duplicate(true)
+		# FIX ERROR: Gunakan .assign() agar untyped Array dari JSON dilempar aman ke Array[Dictionary]
+		inv_mgr.inventory.assign(saved_items.duplicate(true))
 
 	if not saved_hotbar.is_empty():
-		inv_mgr.hotbar = saved_hotbar.duplicate(true)
+		# Sama di sini, gunakan assign()
+		inv_mgr.hotbar.assign(saved_hotbar.duplicate(true))
 
-	# Hitung ulang bobot tas
 	if inv_mgr.has_method("_recalculate_weight"):
 		inv_mgr._recalculate_weight()
 
 	inventory_synced.emit()
 
 
-## Wrapper penambah item agar kompatibel dengan sistem lama
 func add_item_to_inventory(item_id: String, amount: int = 1) -> bool:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
 	if inv_mgr and inv_mgr.has_method("add_item"):
@@ -126,7 +122,6 @@ func add_item_to_inventory(item_id: String, amount: int = 1) -> bool:
 	return false
 
 
-## Wrapper cek kunci untuk Door.gd
 func has_key(key_id: String) -> bool:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
 	if inv_mgr and inv_mgr.has_method("has_item"):
@@ -139,7 +134,7 @@ func set_flashlight_battery(val: float) -> void:
 
 
 # ==============================================================================
-# SISTEM MEKANIK SANITY
+# SISTEM SANITY
 # ==============================================================================
 
 func get_current_sanity() -> float:
@@ -183,7 +178,7 @@ func _check_sanity_status(val: float) -> void:
 
 
 # ==============================================================================
-# SISTEM 20 SLOT RECOVERY LOG
+# SISTEM 20 SLOT RECOVERY LOG & LOADGAME
 # ==============================================================================
 
 func get_slot_path(slot_index: int) -> String:
@@ -192,6 +187,24 @@ func get_slot_path(slot_index: int) -> String:
 
 func has_slot_file(slot_index: int) -> bool:
 	return FileAccess.file_exists(get_slot_path(slot_index))
+
+
+func get_slot_summary(slot_index: int) -> String:
+	if not has_slot_file(slot_index):
+		return "EMPTY ARCHIVE SLOT"
+
+	var file := FileAccess.open(get_slot_path(slot_index), FileAccess.READ)
+	if not file:
+		return "CORRUPTED LOG"
+
+	var json := JSON.new()
+	if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
+		var meta: Dictionary = json.data.get("meta", {})
+		var title: String = meta.get("chapter_title", "SANATORIUM LOG")
+		var date_str: String = meta.get("save_date", "")
+		return "%s [%s]" % [title, date_str] if date_str != "" else title
+
+	return "EMPTY ARCHIVE SLOT"
 
 
 func get_slot_info(slot_index: int) -> Dictionary:
@@ -221,6 +234,16 @@ func get_saved_scene_path() -> String:
 	return DEFAULT_GAMEPLAY_SCENE
 
 
+func save_game(slot_index: int = -1) -> bool:
+	if slot_index == -1:
+		slot_index = active_slot
+	return save_to_slot(slot_index)
+
+
+func load_game(slot_index: int) -> bool:
+	return load_from_slot(slot_index)
+
+
 func save_to_slot(slot_index: int = active_slot) -> bool:
 	active_slot = clampi(slot_index, 1, MAX_SLOTS)
 	current_data["meta"]["save_date"] = Time.get_datetime_string_from_system(false, true)
@@ -229,7 +252,6 @@ func save_to_slot(slot_index: int = active_slot) -> bool:
 	if scene_now and scene_now.scene_file_path != "":
 		current_data["meta"]["scene_path"] = scene_now.scene_file_path
 
-	# Sinkronkan barang di inventory ke skema save
 	_sync_from_inventory_manager()
 
 	var file := FileAccess.open(get_slot_path(active_slot), FileAccess.WRITE)
@@ -240,7 +262,7 @@ func save_to_slot(slot_index: int = active_slot) -> bool:
 	file.store_string(JSON.stringify(current_data, "\t"))
 	file.close()
 	save_settings()
-	print("[SaveManager] Berhasil menyimpan progress ke Slot #", active_slot, " | Scene: ", current_data["meta"]["scene_path"])
+	print("[SaveManager] Sukses simpan progress ke Slot #", active_slot)
 	return true
 
 
@@ -259,13 +281,12 @@ func load_from_slot(slot_index: int) -> bool:
 		current_data["settings"] = saved_settings
 		active_slot = slot_index
 
-		# Dorong data barang yang baru di-load kembali ke InventoryManager
 		_push_to_inventory_manager()
 
 		var cur_san: float = get_current_sanity()
 		is_in_critical_sanity = (cur_san <= CRITICAL_SANITY_THRESHOLD)
 		sanity_changed.emit(cur_san, MAX_SANITY)
-		print("[SaveManager] Berhasil memuat data dari Slot #", slot_index, " | Target Scene: ", get_saved_scene_path())
+		print("[SaveManager] Sukses load data dari Slot #", slot_index)
 		return true
 
 	return false
@@ -280,12 +301,8 @@ func delete_slot(slot_index: int) -> bool:
 
 
 # ==============================================================================
-# SETTINGS PERSISTENCE & AUDIO
+# SETTINGS
 # ==============================================================================
-
-func save_game() -> bool:
-	return save_settings()
-
 
 func save_settings() -> bool:
 	var file := FileAccess.open(SETTINGS_FILE_PATH, FileAccess.WRITE)
