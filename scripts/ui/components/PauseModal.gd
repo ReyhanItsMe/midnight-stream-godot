@@ -81,12 +81,12 @@ func _build_hud_pause_button() -> void:
 	btn_pause_hud.font_size_override = 9
 	btn_pause_hud.set_variant(GameMenuButton.Variant.DEFAULT)
 	
-	# PENTING: Pindahkan ke tengah atas layar (X di tengah resolusi 640, Y = 10)
 	btn_pause_hud.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	btn_pause_hud.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	btn_pause_hud.offset_top = 10
 	btn_pause_hud.pressed.connect(open_pause_menu)
 	add_child(btn_pause_hud)
+
 
 # ==============================================================================
 # 2. STRUKTUR MODAL UTAMA (SESUAI KONFIRMASI LOG & ARCHIVES)
@@ -107,7 +107,6 @@ func _build_modal_structure() -> void:
 	center.custom_minimum_size = VIEWPORT_RES
 	overlay_bg.add_child(center)
 
-	# Wrapper vertikal untuk Card + Tombol [X] menggantung di bawahnya
 	modal_wrapper = VBoxContainer.new()
 	modal_wrapper.add_theme_constant_override("separation", 6)
 	modal_wrapper.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -129,7 +128,6 @@ func _build_modal_structure() -> void:
 	_build_view_settings(content_stack)
 	_build_view_warning(content_stack)
 
-	# Tombol [ X ] kecil menggantung di bawah modal seperti di screenshot
 	btn_floating_close = GameMenuButton.new()
 	btn_floating_close.text = "X"
 	btn_floating_close.set_dimensions(22, 20)
@@ -174,6 +172,7 @@ func _build_view_main(parent: Node) -> void:
 
 	var btn_settings := _make_game_btn("SETTINGS", 196, 24, GameMenuButton.Variant.DEFAULT)
 	btn_settings.pressed.connect(func():
+		_sync_initial_audio()
 		_refresh_settings_ui()
 		_show_view("settings")
 	)
@@ -185,7 +184,7 @@ func _build_view_main(parent: Node) -> void:
 
 
 # ==============================================================================
-# SUB-VIEW 2: LOAD LOG (PERSIS BROADCAST ARCHIVES // RECOVERY LOG)
+# SUB-VIEW 2: LOAD LOG (BROADCAST ARCHIVES // RECOVERY LOG)
 # ==============================================================================
 
 func _build_view_load(parent: Node) -> void:
@@ -205,7 +204,6 @@ func _build_view_load(parent: Node) -> void:
 	lbl_slot_counter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_child(lbl_slot_counter)
 
-	# Area Daftar Slot + Scrollbar Kuning + Tombol ▲ ▼
 	var list_hbox := HBoxContainer.new()
 	list_hbox.add_theme_constant_override("separation", 6)
 	list_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -223,7 +221,6 @@ func _build_view_load(parent: Node) -> void:
 	slot_list_vbox.add_theme_constant_override("separation", 5)
 	load_scroll.add_child(slot_list_vbox)
 
-	# Tombol Navigasi ▲ / ▼ di sebelah kanan
 	var nav_vbox := VBoxContainer.new()
 	nav_vbox.add_theme_constant_override("separation", 4)
 	nav_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -243,7 +240,6 @@ func _build_view_load(parent: Node) -> void:
 	)
 	nav_vbox.add_child(btn_down)
 
-	# Baris Tombol Bawah: LOAD LOG | DELETE | < BACK
 	var action_hbox := HBoxContainer.new()
 	action_hbox.add_theme_constant_override("separation", 8)
 	action_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -266,7 +262,7 @@ func _build_view_load(parent: Node) -> void:
 
 
 # ==============================================================================
-# SUB-VIEW 3: SETTINGS (PERSIS STREAM & AUDIO SETTINGS DI SCREENSHOT)
+# SUB-VIEW 3: SETTINGS
 # ==============================================================================
 
 func _build_view_settings(parent: Node) -> void:
@@ -282,22 +278,18 @@ func _build_view_settings(parent: Node) -> void:
 	var body_margin := _wrap_with_padding(body, 20, 14, 20, 16)
 	view_settings.add_child(body_margin)
 
-	# Baris 1: BGM VOLUME
 	var r_bgm := _create_stepper_row("BGM VOLUME", func(): _step_bgm(-10), func(): _step_bgm(10))
 	lbl_val_bgm = r_bgm["label"]
 	body.add_child(r_bgm["node"])
 
-	# Baris 2: SFX VOLUME
 	var r_sfx := _create_stepper_row("SFX VOLUME", func(): _step_sfx(-10), func(): _step_sfx(10))
 	lbl_val_sfx = r_sfx["label"]
 	body.add_child(r_sfx["node"])
 
-	# Baris 3: SCREEN SHAKE
 	var r_shake := _create_stepper_row("SCREEN SHAKE", _toggle_shake, _toggle_shake)
 	lbl_val_shake = r_shake["label"]
 	body.add_child(r_shake["node"])
 
-	# Baris 4: FLASHLIGHT POWER
 	var r_flash := _create_stepper_row("FLASHLIGHT BEAM", func(): _step_flash(-1), func(): _step_flash(1))
 	lbl_val_flash = r_flash["label"]
 	body.add_child(r_flash["node"])
@@ -344,7 +336,7 @@ func _create_stepper_row(title_text: String, on_minus: Callable, on_plus: Callab
 
 
 # ==============================================================================
-# SUB-VIEW 4: WARNING BACK TO MENU (PERSIS KONFIRMASI MUAT LOG DI SCREENSHOT)
+# SUB-VIEW 4: WARNING BACK TO MENU
 # ==============================================================================
 
 func _build_view_warning(parent: Node) -> void:
@@ -381,7 +373,7 @@ func _build_view_warning(parent: Node) -> void:
 
 
 # ==============================================================================
-# LOGIKA DAFTAR SLOT (GAYA KOTAK #1 + TEKS DI KANAN)
+# LOGIKA DAFTAR SLOT
 # ==============================================================================
 
 func _refresh_load_slots() -> void:
@@ -416,7 +408,6 @@ func _refresh_load_slots() -> void:
 		hbox.add_theme_constant_override("separation", 8)
 		margin.add_child(hbox)
 
-		# Badge Kotak Nomor (#1, #2)
 		var badge := PanelContainer.new()
 		badge.custom_minimum_size = Vector2(32, 22)
 		var badge_style := StyleBoxFlat.new()
@@ -431,7 +422,6 @@ func _refresh_load_slots() -> void:
 		badge.add_child(lbl_num)
 		hbox.add_child(badge)
 
-		# Teks Nama Chapter / Lokasi & Tanggal
 		var summary_str: String = "EMPTY ARCHIVE SLOT"
 		if exists:
 			var loc: String = info.get("location", "CHAPTER 1 // SANATORIUM DAHLIA")
@@ -444,7 +434,6 @@ func _refresh_load_slots() -> void:
 		lbl_desc.clip_text = true
 		hbox.add_child(lbl_desc)
 
-		# Tombol klik transparan di atas baris slot
 		var click_btn := Button.new()
 		click_btn.flat = true
 		click_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -482,6 +471,7 @@ func _get_slot_data(slot_idx: int) -> Dictionary:
 				}
 	return {"exists": false}
 
+
 func _execute_load_selected_slot() -> void:
 	var info := _get_slot_data(selected_slot)
 	if not info.get("exists", false):
@@ -494,20 +484,19 @@ func _execute_load_selected_slot() -> void:
 	if SaveManager and SaveManager.has_method("load_game"):
 		SaveManager.load_game(selected_slot)
 		
-		# Ambil path scene yang tersimpan (kompatibel dengan schema save_path atau scene_path)
 		var target_scene: String = ""
 		if SaveManager.has_method("get_saved_scene_path"):
 			target_scene = SaveManager.get_saved_scene_path()
 		else:
 			target_scene = SaveManager.current_data.get("meta", {}).get("scene_path", "")
 
-		# Pindah ke scene gameplay via loading screen beranimasi
 		if target_scene != "" and ResourceLoader.exists(target_scene):
 			TransitionManager.change_scene_with_loading(target_scene)
 		else:
 			TransitionManager.change_scene_with_loading(get_tree().current_scene.scene_file_path)
 	else:
 		get_tree().reload_current_scene()
+
 
 func _delete_selected_slot() -> void:
 	if SaveManager and SaveManager.has_method("delete_slot"):
@@ -520,20 +509,48 @@ func _delete_selected_slot() -> void:
 
 
 # ==============================================================================
-# LOGIKA SETTINGS STEPPER
+# LOGIKA SETTINGS STEPPER (SINKRONISASI BGM & SFX RESMI)
 # ==============================================================================
 
 func _sync_initial_audio() -> void:
-	var lin := db_to_linear(AudioServer.get_bus_volume_db(0))
-	bgm_pct = clampi(roundi(lin * 100.0 / 10.0) * 10, 0, 100)
+	# Prioritaskan pembacaan dari SaveManager settings agar nilai persis
+	if SaveManager and SaveManager.current_data.has("settings"):
+		var s: Dictionary = SaveManager.current_data["settings"]
+		var raw_bgm = s.get("bgm_volume", 0.2)
+		var raw_sfx = s.get("sfx_volume", 1.0)
+		
+		var f_bgm: float = float(raw_bgm) if float(raw_bgm) <= 1.0 else float(raw_bgm) / 100.0
+		var f_sfx: float = float(raw_sfx) if float(raw_sfx) <= 1.0 else float(raw_sfx) / 100.0
+		
+		bgm_pct = clampi(roundi(f_bgm * 10.0) * 10, 0, 100)
+		sfx_pct = clampi(roundi(f_sfx * 10.0) * 10, 0, 100)
+		screen_shake_on = bool(s.get("screen_shake_enabled", true))
+	else:
+		# Fallback ke bus BGM AudioServer (BUKAN index 0 Master)
+		var bus_bgm_idx := AudioServer.get_bus_index("BGM")
+		if bus_bgm_idx != -1:
+			var lin := db_to_linear(AudioServer.get_bus_volume_db(bus_bgm_idx))
+			bgm_pct = clampi(roundi(lin * 10.0) * 10, 0, 100)
+		else:
+			bgm_pct = 20
 
 
 func _step_bgm(delta_pct: int) -> void:
 	bgm_pct = clampi(bgm_pct + delta_pct, 0, 100)
 	var bus_idx := AudioServer.get_bus_index("BGM")
-	if bus_idx == -1:
-		bus_idx = 0
-	AudioServer.set_bus_volume_db(bus_idx, linear_to_db(maxf(float(bgm_pct) / 100.0, 0.0001)))
+	if bus_idx != -1:
+		if bgm_pct == 0:
+			AudioServer.set_bus_mute(bus_idx, true)
+			AudioServer.set_bus_volume_db(bus_idx, -80.0)
+		else:
+			AudioServer.set_bus_mute(bus_idx, false)
+			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(float(bgm_pct) / 100.0))
+
+	# Simpan perubahan volume ke SaveManager
+	if SaveManager and SaveManager.current_data.has("settings"):
+		SaveManager.current_data["settings"]["bgm_volume"] = float(bgm_pct) / 100.0
+		SaveManager.save_settings()
+
 	_refresh_settings_ui()
 
 
@@ -541,17 +558,31 @@ func _step_sfx(delta_pct: int) -> void:
 	sfx_pct = clampi(sfx_pct + delta_pct, 0, 100)
 	var bus_idx := AudioServer.get_bus_index("SFX")
 	if bus_idx != -1:
-		AudioServer.set_bus_volume_db(bus_idx, linear_to_db(maxf(float(sfx_pct) / 100.0, 0.0001)))
+		if sfx_pct == 0:
+			AudioServer.set_bus_mute(bus_idx, true)
+			AudioServer.set_bus_volume_db(bus_idx, -80.0)
+		else:
+			AudioServer.set_bus_mute(bus_idx, false)
+			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(float(sfx_pct) / 100.0))
 
 	var player_node := get_tree().current_scene.find_child("Player", true, false)
 	if player_node and player_node.get("footstep_player"):
 		var fp: AudioStreamPlayer = player_node.get("footstep_player")
 		fp.volume_db = -80.0 if sfx_pct == 0 else linear_to_db(float(sfx_pct) / 100.0)
+
+	# Simpan perubahan volume ke SaveManager
+	if SaveManager and SaveManager.current_data.has("settings"):
+		SaveManager.current_data["settings"]["sfx_volume"] = float(sfx_pct) / 100.0
+		SaveManager.save_settings()
+
 	_refresh_settings_ui()
 
 
 func _toggle_shake() -> void:
 	screen_shake_on = not screen_shake_on
+	if SaveManager and SaveManager.current_data.has("settings"):
+		SaveManager.current_data["settings"]["screen_shake_enabled"] = screen_shake_on
+		SaveManager.save_settings()
 	_refresh_settings_ui()
 
 
