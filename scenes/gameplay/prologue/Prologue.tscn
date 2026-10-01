@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/player/Player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/HUD.tscn" id="3_hud"]
 [ext_resource type="PackedScene" path="res://scenes/entities/interactables/SavePoint.tscn" id="4_savepoint"]
-[ext_resource type="PackedScene" path="res://scenes/ui/components/SaveModal.tscn" id="5_savemodal"]
+[ext_resource type="PackedScene" path="res://scenes/components/interface/modals/SaveModal.tscn" id="5_savemodal"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
 size = Vector2(640, 16)

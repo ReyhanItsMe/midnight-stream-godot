@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/components/interface/buttons/MenuButton.gd" id="1_button"]
+
+[node name="MenuButton" type="Button"]
+offset_right = 196.0
+offset_bottom = 24.0
+pivot_offset = Vector2(98, 12)
+text = "BUTTON"
+script = ExtResource("1_button")
+

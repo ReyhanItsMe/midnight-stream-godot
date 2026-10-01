@@ -3,8 +3,8 @@ extends Control
 # --- RESOURCE PATHS ---
 const BG_PATH: String = "res://assets/ui/backgrounds/load-game/background-load-game.png"
 const BG_FALLBACK_PATH: String = "res://assets/ui/backgrounds/setting/background-setting.png"
-const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/ui/components/MenuButton.tscn")
-const INFO_MODAL_SCENE: PackedScene = preload("res://scenes/ui/components/InfoModal.tscn")
+const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/MenuButton.tscn")
+const INFO_MODAL_SCENE: PackedScene = preload("res://scenes/components/interface/modals/InfoModal.tscn")
 
 # --- NAVIGATION PATHS ---
 const BACK_SCENE_PATH: String = "res://scenes/ui/screens/main_menu/MainMenu.tscn"

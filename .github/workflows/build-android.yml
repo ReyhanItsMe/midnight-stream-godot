@@ -143,7 +143,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "Beta-Version.Build-${{ github.run_number }}"
-          name: "Midnight Stream Beta Version (Build ${{ github.run_number }})"
+          name: "Midnight Stream Beta Version (Build v0.${{ github.run_number }})"
           draft: true
           files: build/MidnightStream.apk
         env:
