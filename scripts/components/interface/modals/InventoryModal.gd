@@ -1,3 +1,10 @@
+## Jendela modal inventaris/tas streamer untuk mengelola 8 slot tas, 3 slot hotbar, dan kalkulasi berat beban.
+##
+## Cara pakai:
+##   var inv_ui = InventoryModal.new()
+##   add_child(inv_ui)
+##   inv_ui.open()   # Membuka modal tas dan menjeda tree permainan (pause)
+##   inv_ui.close()  # Menutup modal dan melanjutkan permainan
 class_name InventoryModal
 extends BaseModal
 

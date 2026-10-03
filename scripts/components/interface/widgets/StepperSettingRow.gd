@@ -1,3 +1,11 @@
+## Widget UI baris pengaturan bertipe stepper minus-plus (- / +) untuk volume dan opsi numerik.
+##
+## Cara pakai:
+##   var bgm_row = StepperSettingRow.new("VOLUME BGM", "80%")
+##   add_child(bgm_row)
+##   bgm_row.value_decreased.connect(func(): _kurangi_volume())
+##   bgm_row.value_increased.connect(func(): _tambah_volume())
+##   bgm_row.set_value_text("90%")
 class_name StepperSettingRow
 extends HBoxContainer
 

@@ -1,3 +1,11 @@
+## Komponen badge nama dan avatar potret ekspresi karakter pada DialogueBox.
+##
+## Cara pakai:
+##   var portrait = DialoguePortrait.new()
+##   add_child(portrait)
+##   portrait.setup_speaker("Rian", "takut", true, 520.0, true)
+##   # Sembunyikan:
+##   portrait.hide_all()
 class_name DialoguePortrait
 extends Control
 

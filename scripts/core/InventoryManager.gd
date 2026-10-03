@@ -1,3 +1,10 @@
+## Manager inventaris untuk mengelola tas, hotbar 3 slot, dan berat beban.
+##
+## Cara pakai:
+##   InventoryManager.add_item("baterai_senter", 1)
+##   InventoryManager.use_item_at_slot(0)
+##   InventoryManager.assign_to_hotbar(0, 1)
+class_name InventoryManagerClass
 extends Node
 
 signal inventory_updated
@@ -9,58 +16,12 @@ const MAX_SLOTS: int = 8
 const MAX_HOTBAR: int = 3
 const MAX_WEIGHT: float = 15.0
 
-enum ItemType { KEY, CONSUMABLE, DOCUMENT, TOOL }
-
-const ITEM_DB: Dictionary = {
-	"kunci_bangsal_perunggu": {
-		"name": "KUNCI PERUNGGU",
-		"type": ItemType.KEY,
-		"weight": 0.5,
-		"max_stack": 1,
-		"desc": "Kunci tua berbahan perunggu kusam. Berbau karat besi dan darah kering dari pintu Bangsal Timur.",
-		"icon_path": "res://assets/sprites/props/key/key-1/Key1-BRONZE.png"
-	},
-	"kunci_emas_kepala": {
-		"name": "KUNCI RUANG DOKTER",
-		"type": ItemType.KEY,
-		"weight": 0.8,
-		"max_stack": 1,
-		"desc": "Kunci berukir emas milik kepala sanatorium. Membuka ruang arsip rahasia di lantai utama.",
-		"icon_path": "res://assets/sprites/props/key/key-1/Key1-GOLD.png"
-	},
-	"kunci_kutukan_mata": {
-		"name": "KUNCI TERKUTUK",
-		"type": ItemType.KEY,
-		"weight": 2.5,
-		"max_stack": 1,
-		"desc": "Kunci aneh yang terasa berdenyut dingin saat digenggam. Seolah ada sesuatu yang mengintip dari lubangnya.",
-		"icon_path": "res://assets/sprites/props/key/key-6/CURSE/Key8-CURSE-frame0000.png"
-	},
-	"baterai_senter": {
-		"name": "BATERAI SENTER (AA)",
-		"type": ItemType.CONSUMABLE,
-		"weight": 1.5,
-		"max_stack": 4,
-		"desc": "Baterai cadangan berdaya tinggi. Mengisi ulang daya senter sebesar +50%.",
-		"icon_path": "res://assets/sprites/props/senter/senter_item.png"
-	},
-	"peralatan_berat": {
-		"name": "AKI CADANGAN TUA",
-		"type": ItemType.TOOL,
-		"weight": 4.5,
-		"max_stack": 2,
-		"desc": "Aki timbal bekas generator rumah sakit. Sangat berat dan membuat langkah kaki terasa lambat.",
-		"icon_path": "res://assets/sprites/props/key/key-3/Key3-GREY.png"
-	}
-}
-
 var inventory: Array[Dictionary] = []
 var hotbar: Array[Dictionary] = []
 var current_weight: float = 0.0
 
 func _ready() -> void:
 	_initialize_empty_slots()
-
 
 func _initialize_empty_slots() -> void:
 	inventory.clear()
@@ -73,23 +34,22 @@ func _initialize_empty_slots() -> void:
 
 	_recalculate_weight()
 
-
 func get_item_meta(item_id: String) -> Dictionary:
-	return ITEM_DB.get(item_id, {})
-
+	return ItemDatabase.get_item(item_id)
 
 func add_item(item_id: String, amount: int = 1) -> bool:
-	if not ITEM_DB.has(item_id):
+	if not ItemDatabase.has_item(item_id):
 		return false
 
-	var item_data: Dictionary = ITEM_DB[item_id]
-	var added_weight: float = float(item_data["weight"]) * amount
+	var item_data: Dictionary = ItemDatabase.get_item(item_id)
+	var added_weight: float = float(item_data.get("weight", 0.0)) * amount
 
 	if current_weight + added_weight > MAX_WEIGHT:
 		return false
 
-	var max_stack: int = int(item_data["max_stack"])
+	var max_stack: int = int(item_data.get("max_stack", 1))
 
+	# Cek stacking slot yang sudah ada
 	for i in range(MAX_SLOTS):
 		if inventory[i].has("id") and inventory[i]["id"] == item_id:
 			if inventory[i]["amount"] + amount <= max_stack:
@@ -97,6 +57,7 @@ func add_item(item_id: String, amount: int = 1) -> bool:
 				_recalculate_weight()
 				return true
 
+	# Isi slot kosong
 	for i in range(MAX_SLOTS):
 		if not inventory[i].has("id"):
 			inventory[i] = {"id": item_id, "amount": amount}
@@ -105,11 +66,8 @@ func add_item(item_id: String, amount: int = 1) -> bool:
 
 	return false
 
-
 func remove_item_at_slot(slot_idx: int, amount: int = 1) -> bool:
-	if slot_idx < 0 or slot_idx >= MAX_SLOTS:
-		return false
-	if not inventory[slot_idx].has("id"):
+	if slot_idx < 0 or slot_idx >= MAX_SLOTS or not inventory[slot_idx].has("id"):
 		return false
 
 	var removed_id: String = inventory[slot_idx]["id"]
@@ -122,28 +80,29 @@ func remove_item_at_slot(slot_idx: int, amount: int = 1) -> bool:
 	_recalculate_weight()
 	return true
 
-
 func use_item_at_slot(slot_idx: int) -> String:
 	if slot_idx < 0 or slot_idx >= MAX_SLOTS or not inventory[slot_idx].has("id"):
 		return "Slot kosong."
 
 	var item_id: String = str(inventory[slot_idx]["id"])
 	var meta: Dictionary = get_item_meta(item_id)
-	var item_type: int = int(meta.get("type", ItemType.TOOL))
+	var item_type: int = int(meta.get("type", ItemDatabase.ItemType.TOOL))
 
 	match item_type:
-		ItemType.CONSUMABLE:
+		ItemDatabase.ItemType.CONSUMABLE:
 			if item_id == "baterai_senter":
-				if SaveManager and SaveManager.current_data.has("inventory"):
-					var cur_bat: float = float(SaveManager.current_data["inventory"].get("flashlight_battery", 100.0))
-					SaveManager.set_flashlight_battery(minf(cur_bat + 50.0, 100.0))
+				var save_mgr := get_node_or_null("/root/SaveManager")
+				if save_mgr and save_mgr.current_data.has("inventory"):
+					var cur_bat: float = float(save_mgr.current_data["inventory"].get("flashlight_battery", 100.0))
+					save_mgr.set_flashlight_battery(minf(cur_bat + 50.0, 100.0))
+
 				remove_item_at_slot(slot_idx, 1)
 				var msg_bat: String = "Baterai diganti. Daya senter pulih +50%!"
 				item_used.emit(item_id, msg_bat)
 				return msg_bat
 
-		ItemType.KEY:
-			var msg_key: String = "Kunci ini digunakan otomatis saat memeriksa pintu yang terkunci."
+		ItemDatabase.ItemType.KEY:
+			var msg_key: String = "Kunci ini digunakan otomatis saat memeriksa pintu."
 			item_used.emit(item_id, msg_key)
 			return msg_key
 
@@ -155,13 +114,13 @@ func use_item_at_slot(slot_idx: int) -> String:
 
 	return "Tidak dapat digunakan saat ini."
 
-
 func assign_to_hotbar(inv_slot_idx: int, hotbar_idx: int = -1) -> String:
 	if inv_slot_idx < 0 or inv_slot_idx >= MAX_SLOTS or not inventory[inv_slot_idx].has("id"):
 		return "Pilih item terlebih dahulu."
 
 	var item_id: String = inventory[inv_slot_idx]["id"]
 
+	# Lepas jika sudah ada di slot hotbar lain
 	for i in range(MAX_HOTBAR):
 		if hotbar[i].has("id") and hotbar[i]["id"] == item_id:
 			hotbar[i] = {}
@@ -181,7 +140,6 @@ func assign_to_hotbar(inv_slot_idx: int, hotbar_idx: int = -1) -> String:
 	hotbar_updated.emit()
 	return "Dipasang ke Hotbar #" + str(target_hb + 1)
 
-
 func _clean_missing_hotbar_ref(item_id: String) -> void:
 	if has_item_in_bag(item_id):
 		return
@@ -190,13 +148,11 @@ func _clean_missing_hotbar_ref(item_id: String) -> void:
 			hotbar[i] = {}
 	hotbar_updated.emit()
 
-
 func has_item_in_bag(item_id: String) -> bool:
 	for slot in inventory:
 		if slot.has("id") and slot["id"] == item_id:
 			return true
 	return false
-
 
 func has_item(item_id: String) -> bool:
 	if has_item_in_bag(item_id):
@@ -206,17 +162,16 @@ func has_item(item_id: String) -> bool:
 			return true
 	return false
 
-
 func _recalculate_weight() -> void:
 	current_weight = 0.0
 	for slot in inventory:
-		if slot.has("id") and ITEM_DB.has(slot["id"]):
-			var w: float = float(ITEM_DB[slot["id"]]["weight"])
+		if slot.has("id") and ItemDatabase.has_item(slot["id"]):
+			var meta: Dictionary = ItemDatabase.get_item(slot["id"])
+			var w: float = float(meta.get("weight", 0.0))
 			current_weight += w * int(slot["amount"])
 
 	weight_changed.emit(current_weight, MAX_WEIGHT)
 	inventory_updated.emit()
-
 
 func get_encumbrance_level() -> String:
 	var ratio: float = current_weight / MAX_WEIGHT

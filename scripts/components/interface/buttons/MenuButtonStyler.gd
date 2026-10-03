@@ -1,3 +1,7 @@
+## Utilitas statis untuk menerapkan palet tema warna dan StyleBox pada Button.
+##
+## Cara pakai:
+##   MenuButtonStyler.apply_variant(my_button, GameMenuButton.Variant.DANGER)
 class_name MenuButtonStyler
 extends RefCounted
 

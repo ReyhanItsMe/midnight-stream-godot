@@ -17,6 +17,7 @@ config/icon="res://assets/ui/icons/app-icon.png"
 
 [autoload]
 
+SettingsManager="*res://scripts/core/SettingsManager.gd"
 FontManager="*res://scripts/core/FontManager.gd"
 AudioManager="*res://scripts/core/AudioManager.gd"
 SaveManager="*res://scripts/core/SaveManager.gd"

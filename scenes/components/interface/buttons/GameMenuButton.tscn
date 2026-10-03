@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/components/interface/buttons/MenuButton.gd" id="1_button"]
+[ext_resource type="Script" path="res://scripts/components/interface/buttons/GameMenuButton.gd" id="1_button"]
 
 [node name="MenuButton" type="Button"]
 offset_right = 196.0

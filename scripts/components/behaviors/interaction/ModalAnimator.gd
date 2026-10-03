@@ -1,3 +1,12 @@
+## Animator berbasis Tween untuk transisi pop-in / pop-out modal UI saat game dipause.
+##
+## Cara pakai:
+##   var animator = ModalAnimator.new()
+##   add_child(animator)
+##   # Buka (Fade in root + Scale elastic box target):
+##   animator.animate_open(self, modal_box)
+##   # Tutup (Fade out lalu trigger callback):
+##   animator.animate_close(self, func(): queue_free())
 class_name ModalAnimator
 extends Node
 

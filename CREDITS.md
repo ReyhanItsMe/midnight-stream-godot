@@ -1,62 +1,74 @@
 # 📜 Credits & Acknowledgments
 
-Terima kasih kepada seluruh kontributor, kreator aset, dan komunitas sumber terbuka yang telah mendukung pengembangan **Midnight Stream**.
+Terima kasih kepada seluruh kontributor, kreator aset, pengembang
+open-source, dan komunitas yang telah mendukung pengembangan
+**Midnight Stream**.
 
 ---
 
-## 🎮 Pengembang Utama (Core Team)
+## 🎮 Midnight Stream
 
-- **Prixma Studio** – Konsep, Pengembangan, dan Pemeliharaan Proyek
-- **Reyhan** ([@reyhanitsme](https://github.com/reyhanitsme)) – Lead Developer & Maintainer
-
----
-
-## 🎨 Seni & Visual (Pixel Art)
-
-- **Pixel Art & Animasi**
-  - **Keys Pixel Art Pack**
-    - Author / Creator: karsiori
-    - Link: https://karsiori.itch.io/pixel-art-key-pack-animated
-    - License: Creative Commons Zero v1.0 Universal (CC0 1.0 / Public Domain Dedication)
-    - Notes: Pixel art key animations (Non-AI generated)
+**Midnight Stream** adalah game horror pixel yang dikembangkan dan
+dipelihara oleh **Prixma Studio**.
 
 ---
 
-## 🎵 Musik & Efek Suara (Audio)
+## 👤 Pengembang Utama
 
-- **Desain Suara & SFX**:
-  - **Footsteps On Dirt (Retro Style)**
-    - Creator: SilverIllusionist
-    - Source / Release: January 31, 2023 (Freesound)
-    - Attribution Notice: "Footsteps On Dirt (Retro Style)" by SilverIllusionist- **Soundtrack / BGM**:
-  - *[Nama Komposer / Judul Lagu]* – Musik latar tema malam ([Lisensi Audio, cth: CC-BY 4.0])
+- **Prixma Studio** — Konsep, Pengembangan, dan Pemeliharaan Proyek
+- **Reyhan** ([@reyhanitsme](https://github.com/reyhanitsme)) — Lead Developer & Maintainer
 
 ---
 
-## 🛠️ Mesin & Perangkat Lunak (Tools & Frameworks)
+## 🛠️ Engine & Tools
 
-Proyek ini dibangun menggunakan teknologi dan pustaka sumber terbuka berikut:
-
-- **[Godot Engine](https://godotengine.org/)**  
-  *Hak Cipta (c) 2014-sekarang Juan Linietsky, Ariel Manzur, dan kontributor Godot Engine.*  
-  Didistribusikan di bawah [MIT License](https://godotengine.org/license).
-
-- **Android SDK & Build Tools**  
-  Dikembangkan oleh Google LLC dan Open Handset Alliance.
-
-- **GitHub Actions**  
-  Automasi build dan CI/CD pipeline untuk platform Android.
+- **[Godot Engine 4.7.2](https://godotengine.org/)** — Engine utama yang digunakan untuk pengembangan Midnight Stream (didistribusikan di bawah [MIT License](https://godotengine.org/license)).
+- **Android SDK & Build Tools** — Platform API 34 & Build-Tools (`apksigner`) oleh Google LLC / Open Handset Alliance.
+- **GitHub Actions** — Pipeline CI/CD untuk otomatisasi build dan penandatanganan APK Android.
 
 ---
 
-## 🤝 Kontributor Komunitas
+## 📦 Third-Party Assets & Software
 
-Terima kasih kepada seluruh kontributor yang telah mengirimkan pull request, melaporkan bug, dan memberikan saran perbaikan:
+Midnight Stream menggunakan berbagai aset grafis, audio, font, dan software pihak ketiga.
 
-- Kontributor repositori GitHub ([Daftar Kontributor](https://github.com/reyhanitsme/midnight-stream-godot/graphs/contributors))
+Rincian lengkap mengenai kreator, tautan sumber, atribusi, dan teks lisensi asli dapat ditemukan pada:
+
+👉 **[THIRD-PARTY-LICENSES/README.md](THIRD-PARTY-LICENSES/README.md)**
+
+Seluruh materi pihak ketiga tetap tunduk pada lisensi dan ketentuan hak cipta masing-masing pemilik aslinya.
 
 ---
 
-## 📄 Lisensi Proyek
+## 🌟 Special Thanks & Direct Permissions
 
-Kode sumber **Midnight Stream** dirilis di bawah naungan **[MIT License](LICENSE)**.
+Penghargaan khusus untuk kreator yang telah memberikan izin penggunaan karya:
+
+- **princesa Kyra** ([@claudiaguitierrez2014](https://pin.it/4tzgk0MfG))  
+  - **Aset / Karakter**: [Visual Art "Rian" via Pinterest](https://pin.it/3eeBuYL91)  
+  - **Penggunaan di Game**: Sprite karakter "Rian" digunakan sebagai karakter utama (protagonis) sepanjang alur permainan.  
+  - **Status Izin**: Digunakan atas izin langsung melalui komentar (*direct permission via comment*). Seluruh hak cipta desain dan visual asli karakter tetap sepenuhnya menjadi milik kreator.
+
+---
+
+## 🤝 Kontributor
+
+Kontribusi komunitas, laporan bug, dan pull request dapat dilihat melalui halaman repositori GitHub:
+
+[GitHub Contributors](https://github.com/reyhanitsme/midnight-stream-godot/graphs/contributors)
+
+---
+
+## 📄 Project License
+
+Materi asli **Midnight Stream** tunduk pada:
+
+**[Midnight Stream — Non-Commercial Modification & Derivative Works License](LICENSE)**
+
+Lisensi tersebut berlaku untuk materi yang dimiliki oleh pemegang
+hak cipta proyek dan **tidak menggantikan atau mengubah lisensi
+materi pihak ketiga**.
+
+Untuk ketentuan lengkap mengenai penggunaan, modifikasi, fork,
+remake, port, karya turunan, distribusi, dan penggunaan komersial,
+silakan lihat file **[LICENSE](LICENSE)**.

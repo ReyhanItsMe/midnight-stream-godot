@@ -3,7 +3,7 @@ extends Control
 # --- RESOURCE PATHS ---
 const BG_PATH: String = "res://assets/ui/backgrounds/menu/background-menu.png"
 const TITLE_IMG_PATH: String = "res://assets/ui/titles/title-games.png"
-const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/MenuButton.tscn")
+const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/GameMenuButton.tscn")
 
 # --- NAVIGATION TARGET PATHS ---
 const GAME_SCENE_PATH: String = "res://scenes/gameplay/prologue/Prologue.tscn"

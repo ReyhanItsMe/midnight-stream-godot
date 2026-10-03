@@ -1,3 +1,10 @@
+## Modal menu pause terpusat dengan sub-view navigasi (Main Pause, Load Log, dan Settings).
+##
+## Cara pakai:
+##   var pause_ui = PauseModal.new()
+##   add_child(pause_ui)
+##   pause_ui.open_pause_menu() # Menjeda gameplay dan menampilkan menu pause
+##   pause_ui.resume_game()     # Menutup pause dan melanjutkan gameplay
 class_name PauseModal
 extends Control
 

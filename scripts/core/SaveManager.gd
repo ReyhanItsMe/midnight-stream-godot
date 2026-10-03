@@ -1,3 +1,11 @@
+## Manager terpusat untuk data status gameplay, Sanity Rian, dan 20 Slot Archive.
+##
+## Cara pakai:
+##   SaveManager.damage_sanity(15.0)
+##   SaveManager.save_game(1)
+##   SaveManager.load_game(1)
+##   SaveManager.reset_to_new_game()
+class_name SaveManagerClass
 extends Node
 
 # --- SIGNALS ---
@@ -7,7 +15,6 @@ signal sanity_critical(is_critical: bool)
 signal inventory_synced
 
 # --- CONSTANTS ---
-const SETTINGS_FILE_PATH: String = "user://settings.json"
 const SLOT_FILE_TEMPLATE: String = "user://save_slot_%d.json"
 const MAX_SLOTS: int = 20
 const MAX_SANITY: float = 100.0
@@ -43,12 +50,6 @@ var default_data: Dictionary = {
 		"pc_stream_started": false,
 		"door_unlocked": false,
 		"current_event": "none"
-	},
-	"settings": {
-		"bgm_volume": 0.5,
-		"sfx_volume": 1.0,
-		"screen_shake_enabled": true,
-		"text_speed": 0.05
 	}
 }
 
@@ -59,9 +60,6 @@ var play_time_timer: float = 0.0
 
 func _ready() -> void:
 	current_data = default_data.duplicate(true)
-	load_settings()
-	apply_audio_settings()
-
 
 func _process(delta: float) -> void:
 	play_time_timer += delta
@@ -69,7 +67,6 @@ func _process(delta: float) -> void:
 		play_time_timer -= 1.0
 		if current_data.has("meta"):
 			current_data["meta"]["play_time_seconds"] = current_data["meta"].get("play_time_seconds", 0) + 1
-
 
 # ==============================================================================
 # INTEGRASI INVENTORY
@@ -87,7 +84,6 @@ func _sync_from_inventory_manager() -> void:
 	current_data["inventory"]["hotbar"] = inv_mgr.hotbar.duplicate(true)
 	current_data["inventory"]["current_weight"] = inv_mgr.current_weight
 
-
 func _push_to_inventory_manager() -> void:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
 	if not inv_mgr:
@@ -100,18 +96,15 @@ func _push_to_inventory_manager() -> void:
 	if saved_items.is_empty():
 		inv_mgr._initialize_empty_slots()
 	else:
-		# FIX ERROR: Gunakan .assign() agar untyped Array dari JSON dilempar aman ke Array[Dictionary]
 		inv_mgr.inventory.assign(saved_items.duplicate(true))
 
 	if not saved_hotbar.is_empty():
-		# Sama di sini, gunakan assign()
 		inv_mgr.hotbar.assign(saved_hotbar.duplicate(true))
 
 	if inv_mgr.has_method("_recalculate_weight"):
 		inv_mgr._recalculate_weight()
 
 	inventory_synced.emit()
-
 
 func add_item_to_inventory(item_id: String, amount: int = 1) -> bool:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
@@ -121,17 +114,14 @@ func add_item_to_inventory(item_id: String, amount: int = 1) -> bool:
 		return res
 	return false
 
-
 func has_key(key_id: String) -> bool:
 	var inv_mgr: Node = get_node_or_null("/root/InventoryManager")
 	if inv_mgr and inv_mgr.has_method("has_item"):
 		return inv_mgr.has_item(key_id)
 	return false
 
-
 func set_flashlight_battery(val: float) -> void:
 	current_data["inventory"]["flashlight_battery"] = clampf(val, 0.0, MAX_BATTERY)
-
 
 # ==============================================================================
 # SISTEM SANITY
@@ -142,10 +132,8 @@ func get_current_sanity() -> float:
 		return float(current_data["player"]["sanity"])
 	return MAX_SANITY
 
-
 func get_sanity_ratio() -> float:
 	return get_current_sanity() / MAX_SANITY
-
 
 func damage_sanity(amount: float) -> void:
 	if amount <= 0.0:
@@ -155,7 +143,6 @@ func damage_sanity(amount: float) -> void:
 	sanity_changed.emit(current_sanity, MAX_SANITY)
 	_check_sanity_status(current_sanity)
 
-
 func restore_sanity(amount: float) -> void:
 	if amount <= 0.0:
 		return
@@ -163,7 +150,6 @@ func restore_sanity(amount: float) -> void:
 	current_data["player"]["sanity"] = current_sanity
 	sanity_changed.emit(current_sanity, MAX_SANITY)
 	_check_sanity_status(current_sanity)
-
 
 func _check_sanity_status(val: float) -> void:
 	if val <= CRITICAL_SANITY_THRESHOLD and not is_in_critical_sanity:
@@ -176,7 +162,6 @@ func _check_sanity_status(val: float) -> void:
 	if is_zero_approx(val):
 		sanity_depleted.emit()
 
-
 # ==============================================================================
 # SISTEM 20 SLOT RECOVERY LOG & LOADGAME
 # ==============================================================================
@@ -184,10 +169,8 @@ func _check_sanity_status(val: float) -> void:
 func get_slot_path(slot_index: int) -> String:
 	return SLOT_FILE_TEMPLATE % clampi(slot_index, 1, MAX_SLOTS)
 
-
 func has_slot_file(slot_index: int) -> bool:
 	return FileAccess.file_exists(get_slot_path(slot_index))
-
 
 func get_slot_summary(slot_index: int) -> String:
 	if not has_slot_file(slot_index):
@@ -205,7 +188,6 @@ func get_slot_summary(slot_index: int) -> String:
 		return "%s [%s]" % [title, date_str] if date_str != "" else title
 
 	return "EMPTY ARCHIVE SLOT"
-
 
 func get_slot_info(slot_index: int) -> Dictionary:
 	if not has_slot_file(slot_index):
@@ -225,7 +207,6 @@ func get_slot_info(slot_index: int) -> Dictionary:
 		}
 	return {"exists": false}
 
-
 func get_saved_scene_path() -> String:
 	if current_data.has("meta") and current_data["meta"].has("scene_path"):
 		var path: String = current_data["meta"]["scene_path"]
@@ -233,16 +214,13 @@ func get_saved_scene_path() -> String:
 			return path
 	return DEFAULT_GAMEPLAY_SCENE
 
-
 func save_game(slot_index: int = -1) -> bool:
 	if slot_index == -1:
 		slot_index = active_slot
 	return save_to_slot(slot_index)
 
-
 func load_game(slot_index: int) -> bool:
 	return load_from_slot(slot_index)
-
 
 func save_to_slot(slot_index: int = active_slot) -> bool:
 	active_slot = clampi(slot_index, 1, MAX_SLOTS)
@@ -261,10 +239,8 @@ func save_to_slot(slot_index: int = active_slot) -> bool:
 
 	file.store_string(JSON.stringify(current_data, "\t"))
 	file.close()
-	save_settings()
 	print("[SaveManager] Sukses simpan progress ke Slot #", active_slot)
 	return true
-
 
 func load_from_slot(slot_index: int) -> bool:
 	if not has_slot_file(slot_index):
@@ -276,9 +252,7 @@ func load_from_slot(slot_index: int) -> bool:
 
 	var json := JSON.new()
 	if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
-		var saved_settings: Dictionary = current_data.get("settings", {}).duplicate(true)
 		current_data = json.data
-		current_data["settings"] = saved_settings
 		active_slot = slot_index
 
 		_push_to_inventory_manager()
@@ -291,7 +265,6 @@ func load_from_slot(slot_index: int) -> bool:
 
 	return false
 
-
 func delete_slot(slot_index: int) -> bool:
 	if has_slot_file(slot_index):
 		DirAccess.remove_absolute(get_slot_path(slot_index))
@@ -299,64 +272,8 @@ func delete_slot(slot_index: int) -> bool:
 		return true
 	return false
 
-
-# ==============================================================================
-# SETTINGS
-# ==============================================================================
-
-func save_settings() -> bool:
-	var file := FileAccess.open(SETTINGS_FILE_PATH, FileAccess.WRITE)
-	if not file:
-		return false
-	file.store_string(JSON.stringify(current_data.get("settings", {}), "\t"))
-	file.close()
-	apply_audio_settings()
-	return true
-
-
-func load_settings() -> void:
-	if not FileAccess.file_exists(SETTINGS_FILE_PATH):
-		return
-	var file := FileAccess.open(SETTINGS_FILE_PATH, FileAccess.READ)
-	if not file:
-		return
-	var json := JSON.new()
-	if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
-		current_data["settings"] = json.data
-		apply_audio_settings()
-
-
-func apply_audio_settings() -> void:
-	var settings_dict: Dictionary = current_data.get("settings", {})
-	var raw_bgm = settings_dict.get("bgm_volume", 0.5)
-	var raw_sfx = settings_dict.get("sfx_volume", 1.0)
-
-	var bgm_vol: float = float(raw_bgm) if float(raw_bgm) <= 1.0 else float(raw_bgm) / 100.0
-	var sfx_vol: float = float(raw_sfx) if float(raw_sfx) <= 1.0 else float(raw_sfx) / 100.0
-
-	set_bus_volume("BGM", bgm_vol)
-	set_bus_volume("SFX", sfx_vol)
-
-	var audio_mgr = get_node_or_null("/root/AudioManager")
-	if audio_mgr and audio_mgr.has_method("apply_saved_volume"):
-		audio_mgr.apply_saved_volume()
-
-
-func set_bus_volume(bus_name: String, linear_val: float) -> void:
-	var bus_idx := AudioServer.get_bus_index(bus_name)
-	if bus_idx != -1:
-		if linear_val <= 0.001:
-			AudioServer.set_bus_mute(bus_idx, true)
-			AudioServer.set_bus_volume_db(bus_idx, -80.0)
-		else:
-			AudioServer.set_bus_mute(bus_idx, false)
-			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(linear_val))
-
-
 func reset_to_new_game() -> void:
-	var saved_settings: Dictionary = current_data.get("settings", {}).duplicate(true)
 	current_data = default_data.duplicate(true)
-	current_data["settings"] = saved_settings
 	is_in_critical_sanity = false
 	_push_to_inventory_manager()
 	sanity_changed.emit(MAX_SANITY, MAX_SANITY)

@@ -1,3 +1,10 @@
+## Manager terpusat untuk transisi layar (Fade Black & Loading Screen beranimasi).
+##
+## Cara pakai:
+##   TransitionManager.change_scene("res://scenes/gameplay/Room1.tscn")
+##   TransitionManager.change_scene_with_loading(SaveManager.get_saved_scene_path())
+##   TransitionManager.change_scene("res://scenes/ui/Menu.tscn", 0.5)
+class_name TransitionManagerClass
 extends CanvasLayer
 
 const DEFAULT_FADE_DURATION: float = 0.3
@@ -7,7 +14,7 @@ var fade_rect: ColorRect
 var is_transitioning: bool = false
 
 func _ready() -> void:
-	# Layer tertinggi agar selalu menutupi UI paling atas sekalipun
+	# Layer 128 agar selalu menutupi elemen gameplay dan UI modal
 	layer = 128
 
 	fade_rect = ColorRect.new()
@@ -44,7 +51,7 @@ func change_scene(target_path: String, duration: float = DEFAULT_FADE_DURATION) 
 	is_transitioning = false
 
 
-## Pindah ke gameplay dengan Layar Loading beranimasi (Rian lari + progress bar)
+## Pindah ke gameplay dengan Layar Loading beranimasi
 func change_scene_with_loading(target_path: String, duration: float = DEFAULT_FADE_DURATION) -> void:
 	if is_transitioning:
 		return
@@ -61,7 +68,7 @@ func change_scene_with_loading(target_path: String, duration: float = DEFAULT_FA
 	is_transitioning = true
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 
-	# 1. Fade out ke hitam dulu sebentar agar pergantian ke loading screen mulus
+	# 1. Fade out ke hitam
 	var tween := create_tween()
 	tween.tween_property(fade_rect, "color:a", 1.0, duration).set_trans(Tween.TRANS_SINE)
 	await tween.finished

@@ -1,9 +1,20 @@
+## Kelas dasar untuk semua jendela modal UI dengan backdrop dimmer gelap, tombol tutup [X], dan animasi pop-up.
+##
+## Cara pakai (Inheritance):
+##   class_name MyCustomModal extends BaseModal
+##   func _build_content() -> void:
+##       # Isi elemen UI ke content_container
+##       pass
+##
+## Cara buka / tutup dari script luar:
+##   my_modal.open_modal()
+##   my_modal.close()
 class_name BaseModal
 extends Control
 
 signal closed
 
-const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/MenuButton.tscn")
+const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/GameMenuButton.tscn")
 const COLOR_RED_CLOSE: Color = Color(0.85, 0.22, 0.22)
 const COLOR_MODAL_BG: Color = Color(0.05, 0.06, 0.09, 0.98)
 const COLOR_GOLD: Color = Color(0.95, 0.82, 0.25)

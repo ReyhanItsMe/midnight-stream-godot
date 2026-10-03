@@ -1,0 +1,771 @@
+# MIDNIGHT STREAM — NON-COMMERCIAL MODIFICATION & DERIVATIVE WORKS LICENSE
+
+**Project:** Midnight Stream  
+**Copyright Holder:** Raihan Azhar  
+**Username:** @reyhanitsme  
+**Year:** 2026  
+**License Version:** 1.0  
+**Repository:** https://github.com/reyhanitsme/midnight-stream-godot  
+**Contact:** +62 831-7769-4170 (Prixma Studio)
+
+---
+
+## 1. Tentang Lisensi Ini
+
+Lisensi ini dibuat untuk memberikan kebebasan kepada siapa pun untuk mempelajari, menggunakan, memodifikasi, membuat mod, melakukan fork, membuat remake, membuat port, dan membuat karya turunan dari **Midnight Stream**, selama penggunaan tersebut mematuhi ketentuan dalam lisensi ini.
+
+Tujuan utama lisensi ini adalah agar Midnight Stream dapat dikembangkan oleh komunitas secara bebas tanpa menjadikan game, source code, mod, atau karya turunannya sebagai produk yang dijual atau dimonetisasi secara langsung.
+
+Lisensi ini bukan lisensi open-source/FOSS yang disetujui OSI dan tidak dimaksudkan untuk dikategorikan sebagai lisensi FOSS.
+
+Dengan menggunakan materi yang tercakup dalam lisensi ini, Anda dianggap telah membaca, memahami, dan menyetujui ketentuan yang berlaku.
+
+---
+
+# 2. Hak yang Diberikan
+
+Selama mematuhi lisensi ini, Anda diperbolehkan:
+
+- menggunakan Midnight Stream secara gratis;
+- mempelajari source code;
+- menyalin source code;
+- memodifikasi source code;
+- membuat mod;
+- membuat fork;
+- membuat port;
+- membuat remake;
+- membuat karya turunan;
+- mengubah gameplay;
+- mengubah sistem;
+- mengubah UI;
+- mengubah level;
+- menambahkan atau menghapus fitur;
+- mengganti atau menambahkan karakter;
+- membuat variasi cerita;
+- membuat proyek turunan;
+- dan mendistribusikan karya tersebut secara gratis.
+
+Tidak diperlukan izin individual dari pemegang hak cipta untuk melakukan kegiatan-kegiatan tersebut selama seluruh ketentuan lisensi dipatuhi.
+
+---
+
+# 3. Prinsip Utama: Gratis untuk Pengguna
+
+Midnight Stream dan karya turunan yang menggunakan materi yang tercakup dalam lisensi ini harus tetap dapat diperoleh pengguna secara gratis.
+
+Dilarang menjadikan akses terhadap Midnight Stream atau karya turunannya sebagai sesuatu yang harus dibayar.
+
+Contohnya termasuk:
+
+- menjual APK;
+- menjual ZIP mod;
+- menjual source code;
+- menjual remake;
+- menjual fork;
+- menjual port;
+- menjual DLC;
+- menjual akses;
+- memasang paywall;
+- mengunci download di balik pembayaran;
+- atau menggunakan sistem pembayaran lain sebagai syarat memperoleh game/mod.
+
+---
+
+# 4. Distribusi Mod dan Karya Turunan
+
+Mod, fork, remake, port, dan karya turunan boleh didistribusikan secara bebas selama distribusinya gratis.
+
+Contoh media distribusi yang diperbolehkan:
+
+- GitHub Releases;
+- GitHub repository;
+- Google Drive;
+- MediaFire;
+- Dropbox;
+- direct download;
+- website pribadi tanpa monetisasi distribusi;
+- repository publik;
+- atau layanan distribusi gratis lainnya.
+
+Pengguna tidak boleh dipaksa membayar untuk mendapatkan file tersebut.
+
+---
+
+# 5. Download Link dan Praktik Monetisasi Distribusi
+
+Distribusi file harus menyediakan akses download yang wajar dan langsung.
+
+Dilarang menggunakan sistem distribusi yang sengaja menghasilkan pendapatan dari pengguna yang ingin mendapatkan Midnight Stream atau karya turunannya.
+
+Termasuk tetapi tidak terbatas pada:
+
+- link shortener beriklan;
+- link yang mengharuskan pengguna membuka banyak halaman iklan;
+- link yang menggunakan timer untuk menghasilkan pendapatan;
+- halaman download yang sengaja dipenuhi iklan untuk memperoleh pendapatan dari distribusi game/mod;
+- sistem "unlock download" melalui iklan;
+- sistem yang mengharuskan pengguna menyelesaikan iklan sebelum mendapatkan file;
+- atau metode lain yang menjadikan proses download game/mod sebagai sumber pendapatan.
+
+Contoh:
+
+```text
+Google Drive direct download
+✓ BOLEH
+
+MediaFire direct download
+✓ BOLEH
+
+GitHub Release
+✓ BOLEH
+
+Shortlink → iklan → timer → redirect → download
+✗ TIDAK BOLEH
+
+Website → banyak iklan → tunggu timer → download
+✗ TIDAK BOLEH
+```
+
+Tujuan ketentuan ini adalah agar pengguna tidak dipaksa menghasilkan pendapatan bagi distributor hanya untuk memperoleh game atau mod yang seharusnya tersedia secara gratis.
+
+---
+
+# 6. Konten YouTube, TikTok, Streaming, dan Media Sosial
+
+Membuat dan mempublikasikan konten mengenai Midnight Stream diperbolehkan.
+
+Termasuk:
+
+- gameplay;
+- walkthrough;
+- review;
+- tutorial;
+- video mod;
+- showcase;
+- speedrun;
+- livestream;
+- video development;
+- video dokumentasi;
+- video reaction;
+- dan konten lainnya.
+
+Konten tersebut **boleh dimonetisasi oleh pembuat konten**.
+
+Contohnya:
+
+```text
+Upload gameplay Midnight Stream ke YouTube
+✓ BOLEH
+
+Channel YouTube memiliki AdSense
+✓ BOLEH
+
+Video mendapatkan banyak views dan menghasilkan pendapatan
+✓ BOLEH
+
+Live streaming Midnight Stream dengan monetisasi YouTube
+✓ BOLEH
+```
+
+Pendapatan dari platform tempat konten tersebut dipublikasikan tidak dianggap sebagai penjualan atau monetisasi langsung terhadap game selama pengguna tidak menjadikan game/mod itu sendiri sebagai produk berbayar.
+
+---
+
+# 7. Link Download di Video atau Deskripsi
+
+Pembuat konten boleh menyertakan link download Midnight Stream atau mod di:
+
+- deskripsi YouTube;
+- komentar;
+- halaman GitHub;
+- website;
+- media sosial;
+- atau tempat lain yang wajar.
+
+Link tersebut harus mengarah ke distribusi gratis dan tidak boleh menggunakan metode monetisasi download yang dilarang dalam Bagian 5.
+
+---
+
+# 8. Password File dan Video
+
+Password pada file yang didistribusikan diperbolehkan.
+
+Contohnya:
+
+```text
+Download: https://example.com/mod.zip
+Password: MIDNIGHT2026
+```
+
+Password boleh diberikan melalui video, deskripsi, komentar, atau media lainnya.
+
+Namun password tidak boleh sengaja disembunyikan dengan cara yang tidak wajar hanya untuk memaksa pengguna menonton iklan atau menghasilkan pendapatan.
+
+Jika password diberikan melalui video, password harus ditampilkan secara jelas dan dapat dibaca.
+
+Tidak diperbolehkan menggunakan teknik yang sengaja membuat password hampir tidak terlihat, seperti menampilkan password selama waktu yang sangat singkat atau menggunakan kedipan ekstrem agar pengguna terpaksa memutar ulang video berkali-kali.
+
+Menampilkan password secara wajar dalam video diperbolehkan.
+
+Contoh:
+
+```text
+Password ditampilkan selama beberapa detik
+✓ BOLEH
+
+Password terlihat jelas di layar
+✓ BOLEH
+
+Password ditulis di deskripsi
+✓ BOLEH
+
+Password muncul sekitar 0,01 detik agar video harus diulang
+✗ TIDAK BOLEH
+
+Password dibuat sangat kecil/tidak terbaca dengan sengaja
+✗ TIDAK BOLEH
+```
+
+Ketentuan ini tidak melarang pembuat konten meminta pengguna menonton video secara normal.
+
+---
+
+# 9. Donasi
+
+Donasi sukarela diperbolehkan.
+
+Pembuat mod, fork, remake, atau pembuat konten boleh menyertakan link donasi seperti:
+
+- Trakteer;
+- Ko-fi;
+- GitHub Sponsors;
+- PayPal;
+- atau layanan donasi lainnya.
+
+Link donasi dapat ditempatkan bersama link download.
+
+Namun donasi tidak boleh menjadi syarat untuk memperoleh game atau mod.
+
+Contoh:
+
+```text
+Download Mod:
+https://example.com/mod.zip
+
+Kalau mau support:
+https://trakteer.id/example
+```
+
+✓ BOLEH
+
+Sedangkan:
+
+```text
+Donasi Rp10.000 terlebih dahulu untuk mendapatkan mod.
+```
+
+✗ TIDAK BOLEH
+
+atau:
+
+```text
+Donatur mendapatkan link download,
+pengguna biasa tidak mendapatkan akses.
+```
+
+✗ TIDAK BOLEH
+
+Donasi harus benar-benar bersifat sukarela dan tidak boleh digunakan sebagai cara tidak langsung untuk menjual game atau mod.
+
+---
+
+# 10. Website Distribusi
+
+Membuat website untuk menyediakan informasi, dokumentasi, screenshot, video, changelog, source code, atau download Midnight Stream diperbolehkan.
+
+Website tersebut tidak boleh menjadikan akses download Midnight Stream sebagai sumber pendapatan langsung melalui iklan, shortlink, timer, paywall, atau sistem serupa.
+
+Contoh:
+
+```text
+Website sederhana
+→ informasi game
+→ screenshot
+→ changelog
+→ tombol Google Drive
+→ tombol GitHub
+→ link donasi sukarela
+
+✓ BOLEH
+```
+
+Sedangkan:
+
+```text
+Website
+→ banner iklan
+→ pop-up iklan
+→ timer
+→ beberapa redirect
+→ link download
+```
+
+✗ TIDAK BOLEH apabila monetisasi tersebut digunakan untuk memperoleh pendapatan dari distribusi Midnight Stream atau modnya.
+
+---
+
+# 11. Monetisasi yang Tidak Berasal dari Distribusi Game
+
+Lisensi ini tidak melarang seseorang memperoleh pendapatan dari konten yang membahas Midnight Stream.
+
+Pendapatan yang diperoleh secara independen dari platform konten diperbolehkan.
+
+Contohnya:
+
+- YouTube AdSense;
+- monetisasi video;
+- livestream;
+- sponsorship konten;
+- iklan pada video;
+- membership channel;
+- donasi penonton;
+- atau bentuk pendapatan dari aktivitas pembuatan konten.
+
+Selama pendapatan tersebut berasal dari **konten atau aktivitas pembuat konten**, bukan dari menjual atau memonetisasi akses terhadap Midnight Stream atau karya turunannya.
+
+---
+
+# 12. Modifikasi
+
+Anda bebas memodifikasi Midnight Stream.
+
+Modifikasi dapat mencakup:
+
+- gameplay;
+- mekanik;
+- UI;
+- karakter;
+- item;
+- map;
+- level;
+- audio;
+- visual;
+- sistem inventory;
+- AI;
+- efek;
+- menu;
+- cerita;
+- dialog;
+- kontrol;
+- dan komponen lainnya.
+
+Anda tidak perlu meminta izin sebelum membuat modifikasi.
+
+---
+
+# 13. Fork
+
+Fork repository Midnight Stream diperbolehkan.
+
+Fork dapat dikembangkan secara independen dan dapat memiliki:
+
+- nama repository berbeda;
+- fitur berbeda;
+- gameplay berbeda;
+- sistem berbeda;
+- visual berbeda;
+- atau arah pengembangan berbeda.
+
+Namun fork yang masih menggunakan materi yang tercakup dalam lisensi ini tetap wajib mematuhi lisensi ini.
+
+---
+
+# 14. Remake
+
+Remake diperbolehkan.
+
+Remake dapat dibuat menggunakan:
+
+- Godot;
+- Unity;
+- Unreal Engine;
+- GameMaker;
+- JavaScript;
+- C++;
+- C#;
+- Java;
+- atau teknologi lainnya.
+
+Remake tidak harus menggunakan engine atau source code asli.
+
+Namun apabila remake menggunakan bagian substansial dari karya asli Midnight Stream, termasuk source code, karakter, cerita, artwork, aset, struktur permainan yang khas, atau materi kreatif lain yang tercakup dalam lisensi ini, remake tersebut tetap tunduk pada ketentuan lisensi ini.
+
+Remake yang termasuk karya turunan tidak boleh dijual atau dimonetisasi secara langsung.
+
+---
+
+# 15. Karya yang Dibuat dari Nol
+
+Lisensi ini tidak dimaksudkan untuk melarang seseorang membuat game baru dari nol hanya karena game tersebut terinspirasi oleh Midnight Stream.
+
+Ide umum, genre, mekanik permainan umum, konsep umum, atau inspirasi yang tidak mengambil karya kreatif spesifik dari Midnight Stream tidak secara otomatis menjadi milik pemegang hak cipta.
+
+Contohnya:
+
+```text
+Membuat game horror pixel
+✓ BOLEH
+
+Menggunakan mekanik flashlight yang umum
+✓ BOLEH
+
+Membuat sistem inventory yang umum
+✓ BOLEH
+
+Membuat game dengan suasana horror yang serupa
+✓ BOLEH
+```
+
+Namun, membuat karya baru dari nol tidak otomatis membebaskan seseorang dari lisensi apabila karya tersebut secara substansial mengambil atau mereproduksi materi kreatif Midnight Stream.
+
+---
+
+# 16. Kemiripan dan Inspirasi
+
+Kemiripan kecil atau penggunaan ide umum tidak dengan sendirinya dianggap sebagai pelanggaran.
+
+Midnight Stream sendiri dapat mengambil inspirasi dari karya, game, genre, atau mekanik lain.
+
+Lisensi ini tidak dimaksudkan untuk mengklaim kepemilikan terhadap ide umum, genre, mekanik yang bersifat umum, atau konsep permainan yang telah dikenal secara luas.
+
+Namun, apabila sebuah karya menggunakan atau mereproduksi bagian substansial dari source code, asset, karakter, cerita, dialog, desain, struktur unik, atau materi kreatif Midnight Stream, maka karya tersebut dapat dianggap sebagai karya turunan dan tunduk pada lisensi ini.
+
+---
+
+# 17. Ambang Batas Karya Turunan
+
+Tidak terdapat persentase kode tertentu yang secara otomatis menentukan apakah suatu proyek merupakan karya turunan.
+
+Contoh seperti "80% sama" dapat menjadi indikator praktis, tetapi bukan satu-satunya ukuran.
+
+Penentuan harus mempertimbangkan apakah proyek tersebut menggunakan atau mereproduksi bagian substansial dari karya asli.
+
+Hal-hal yang dapat dipertimbangkan antara lain:
+
+- source code;
+- struktur kode;
+- sistem permainan;
+- asset;
+- karakter;
+- cerita;
+- dialog;
+- desain;
+- map;
+- UI;
+- artwork;
+- audio;
+- atau kombinasi dari materi tersebut.
+
+Mengubah nama variabel, memindahkan file, atau melakukan perubahan kecil terhadap source code tidak secara otomatis membuat karya tersebut menjadi karya yang sepenuhnya baru.
+
+---
+
+# 18. Nama Midnight Stream dan Identitas Resmi
+
+Lisensi ini tidak memberikan hak untuk menyatakan sebuah karya sebagai versi resmi Midnight Stream.
+
+Anda boleh membuat:
+
+```text
+Midnight Stream Fan Mod
+Midnight Stream Unofficial Remake
+Midnight Stream Community Edition
+Midnight Stream Fan Project
+```
+
+selama tidak memberikan kesan bahwa karya tersebut dibuat atau disetujui secara resmi oleh pemegang hak cipta.
+
+Dilarang menggunakan istilah seperti:
+
+```text
+Official Midnight Stream
+Midnight Stream Official Edition
+Official Remake
+Official Port
+```
+
+tanpa izin tertulis dari pemegang hak cipta.
+
+---
+
+# 19. Nama, Logo, dan Branding
+
+Hak atas nama, logo, ikon, branding, dan identitas resmi Midnight Stream tidak secara otomatis diberikan melalui lisensi ini.
+
+Kebebasan memodifikasi source code tidak berarti bahwa pengguna memperoleh hak untuk mengklaim identitas resmi proyek.
+
+Pemegang hak cipta dapat menetapkan aturan tambahan mengenai penggunaan nama dan logo Midnight Stream.
+
+---
+
+# 20. Aset
+
+Tidak semua aset di dalam repository Midnight Stream secara otomatis dimiliki atau dilisensikan oleh Raihan Azhar.
+
+Beberapa aset dapat berasal dari pihak ketiga dan memiliki lisensi masing-masing.
+
+Contohnya:
+
+- PNG;
+- sprite;
+- font;
+- musik;
+- sound effect;
+- texture;
+- icon;
+- plugin;
+- library;
+- artwork;
+- dan aset lainnya.
+
+Aset pihak ketiga tetap tunduk pada lisensi pemilik masing-masing.
+
+Pengguna wajib memeriksa lisensi aset tersebut sebelum menggunakannya di luar konteks yang diperbolehkan oleh lisensi asalnya.
+
+Lisensi Midnight Stream tidak memberikan hak yang lebih luas daripada hak yang dimiliki pemegang proyek terhadap aset pihak ketiga.
+
+---
+
+# 21. Aset Original Midnight Stream
+
+Aset yang secara jelas dibuat oleh Raihan Azhar dan dinyatakan tercakup dalam lisensi ini dapat digunakan untuk membuat modifikasi dan karya turunan non-komersial.
+
+Aset tersebut dapat dimodifikasi, diganti, atau digunakan dalam mod, fork, remake, dan karya turunan selama ketentuan lisensi ini tetap dipatuhi.
+
+---
+
+# 22. Kontribusi
+
+Versi proyek yang dirilis berdasarkan lisensi ini pada saat lisensi diterbitkan merupakan karya yang dibuat oleh:
+
+**Raihan Azhar (@reyhanitsme)**
+
+Proyek ini tidak menggunakan sistem kontribusi wajib atau pengalihan hak dari kontributor pada saat lisensi ini diterbitkan.
+
+Kontribusi pihak lain di masa mendatang dapat memiliki ketentuan hak cipta tersendiri apabila pemegang proyek memutuskan untuk menerima kontribusi eksternal.
+
+---
+
+# 23. Atribusi
+
+Distribusi Midnight Stream atau karya turunan yang menggunakan materi yang tercakup dalam lisensi ini wajib memberikan atribusi yang wajar.
+
+Minimal:
+
+> Midnight Stream  
+> Original project by Raihan Azhar (@reyhanitsme)  
+> Repository: https://github.com/reyhanitsme/midnight-stream-godot
+
+Atribusi dapat ditempatkan pada:
+
+- README;
+- halaman credits;
+- menu About;
+- dokumentasi;
+- halaman download;
+- deskripsi distribusi;
+- atau tempat lain yang wajar.
+
+Atribusi tidak boleh digunakan untuk menyatakan bahwa Raihan Azhar atau Prixma Studio mendukung atau menyetujui sebuah karya apabila memang tidak demikian.
+
+---
+
+# 24. Prixma Studio
+
+Raihan Azhar (@reyhanitsme) merupakan salah satu founder/pimpinan **Prixma Studio**.
+
+Kontak Prixma Studio digunakan sebagai salah satu sarana komunikasi mengenai proyek ini.
+
+Keterlibatan Prixma Studio sebagai kontak tidak secara otomatis berarti bahwa hak cipta Midnight Stream dimiliki oleh Prixma Studio.
+
+Hak cipta tetap berada pada pemegang hak cipta yang disebutkan dalam lisensi ini, kecuali terdapat perjanjian tertulis lain yang menyatakan sebaliknya.
+
+---
+
+# 25. Tidak Ada Pengalihan Hak Cipta
+
+Lisensi ini memberikan izin penggunaan tertentu, tetapi tidak mengalihkan kepemilikan hak cipta.
+
+Hak cipta atas karya asli tetap dimiliki oleh:
+
+**Raihan Azhar (@reyhanitsme)**
+
+Pengguna, pembuat mod, pembuat fork, atau pembuat remake tidak memperoleh kepemilikan terhadap karya asli hanya karena mereka memodifikasinya.
+
+---
+
+# 26. Tidak Ada Jaminan
+
+Midnight Stream disediakan **"SEBAGAIMANA ADANYA" (AS IS)** tanpa jaminan apa pun, sejauh diperbolehkan oleh hukum yang berlaku.
+
+Pemegang hak cipta tidak menjamin bahwa proyek:
+
+- bebas dari bug;
+- bebas dari kesalahan;
+- bebas dari kerentanan;
+- kompatibel dengan seluruh perangkat;
+- kompatibel dengan seluruh platform;
+- selalu tersedia;
+- atau sesuai dengan kebutuhan tertentu pengguna.
+
+Penggunaan proyek dilakukan atas tanggung jawab pengguna sendiri.
+
+---
+
+# 27. Batas Tanggung Jawab
+
+Sejauh diperbolehkan oleh hukum yang berlaku, pemegang hak cipta tidak bertanggung jawab atas kerugian, kehilangan data, kerusakan perangkat, atau kerugian lainnya yang timbul dari penggunaan, modifikasi, distribusi, atau karya turunan Midnight Stream.
+
+Ketentuan ini tidak dimaksudkan untuk menghilangkan tanggung jawab yang secara hukum tidak dapat dikecualikan.
+
+---
+
+# 28. Pelanggaran Lisensi
+
+Apabila seseorang menggunakan, menyalin, memodifikasi, atau mendistribusikan materi yang tercakup dalam lisensi ini di luar izin yang diberikan, izin yang diberikan melalui lisensi ini dapat berakhir secara otomatis sejauh diperbolehkan oleh hukum yang berlaku.
+
+Setelah izin berakhir, pihak tersebut harus menghentikan penggunaan dan distribusi materi yang tidak lagi berada dalam batas izin.
+
+Pemegang hak cipta tetap mempertahankan hak dan upaya hukum yang tersedia berdasarkan hukum yang berlaku.
+
+---
+
+# 29. Penggunaan Komersial dengan Izin
+
+Pemegang hak cipta dapat memberikan izin khusus untuk penggunaan komersial.
+
+Permintaan izin dapat disampaikan kepada:
+
+**Raihan Azhar (@reyhanitsme)**  
+**Prixma Studio**  
+**Contact:** +62 831-7769-4170
+
+Penggunaan komersial hanya diperbolehkan apabila terdapat izin tertulis dari pemegang hak cipta.
+
+Tidak ada izin komersial yang dianggap diberikan hanya karena source code tersedia secara publik.
+
+---
+
+# 30. Pemisahan Ketentuan
+
+Apabila suatu ketentuan dalam lisensi ini dianggap tidak sah, tidak berlaku, atau tidak dapat diberlakukan berdasarkan hukum yang berlaku, ketentuan lainnya tetap berlaku sejauh diperbolehkan oleh hukum.
+
+Ketentuan yang tidak dapat diberlakukan akan ditafsirkan atau disesuaikan sejauh diperlukan agar tetap mendekati tujuan awalnya.
+
+---
+
+# 31. Hukum yang Berlaku
+
+Lisensi ini ditafsirkan berdasarkan hukum yang berlaku di wilayah hukum pemegang hak cipta, dengan tetap memperhatikan ketentuan hukum yang wajib berlaku terhadap pihak terkait.
+
+---
+
+# 32. Versi Lisensi
+
+Pemegang hak cipta dapat menerbitkan versi baru dari lisensi ini untuk rilisan proyek di masa mendatang.
+
+Versi Midnight Stream yang telah dirilis sebelumnya tetap tunduk pada versi lisensi yang disertakan pada saat versi tersebut dirilis, kecuali terdapat pernyataan atau perjanjian tertulis yang sah yang menyatakan lain.
+
+---
+
+# 33. Ringkasan Sederhana
+
+## BOLEH
+
+- ✓ Download gratis
+- ✓ Memainkan game
+- ✓ Membaca source code
+- ✓ Mempelajari source code
+- ✓ Menyalin source code
+- ✓ Memodifikasi source code
+- ✓ Membuat mod
+- ✓ Membuat fork
+- ✓ Membuat remake
+- ✓ Membuat port
+- ✓ Membuat karya turunan
+- ✓ Mengubah gameplay
+- ✓ Mengubah cerita
+- ✓ Mengubah karakter
+- ✓ Mengubah UI
+- ✓ Mengubah sistem
+- ✓ Membagikan mod secara gratis
+- ✓ Membagikan fork secara gratis
+- ✓ Membagikan remake secara gratis
+- ✓ Upload gameplay ke YouTube
+- ✓ Upload review
+- ✓ Live streaming
+- ✓ Mendapatkan pendapatan YouTube dari views/konten
+- ✓ Menyertakan link donasi sukarela
+- ✓ Menggunakan Trakteer
+- ✓ Menggunakan Ko-fi
+- ✓ Membuat website informasi/download gratis
+- ✓ Menggunakan Google Drive untuk distribusi
+- ✓ Menggunakan MediaFire untuk distribusi
+- ✓ Memberikan password ZIP melalui video selama password terlihat secara wajar
+- ✓ Membuat game baru yang hanya terinspirasi secara umum
+
+## TIDAK BOLEH TANPA IZIN
+
+- ✗ Menjual Midnight Stream
+- ✗ Menjual APK
+- ✗ Menjual source code
+- ✗ Menjual mod
+- ✗ Menjual fork
+- ✗ Menjual remake
+- ✗ Menjual port
+- ✗ Menjual karya turunan
+- ✗ Membuat download berbayar
+- ✗ Memasang paywall
+- ✗ Memaksa donasi sebelum download
+- ✗ Menggunakan shortlink beriklan untuk mendapatkan uang dari download
+- ✗ Memaksa pengguna melewati halaman iklan untuk mendapatkan file
+- ✗ Menggunakan timer iklan untuk menghasilkan uang dari distribusi
+- ✗ Menambahkan iklan pada halaman download untuk menghasilkan pendapatan dari distribusi game/mod
+- ✗ Mengunci password agar pengguna harus menonton iklan
+- ✗ Menyembunyikan password secara sengaja agar pengguna harus memutar video berulang kali
+- ✗ Mengklaim mod/fork/remake sebagai versi resmi
+- ✗ Menghapus atribusi yang diwajibkan
+- ✗ Menggunakan nama/logo resmi seolah-olah mendapat persetujuan
+- ✗ Menggunakan source code atau aset yang tercakup dalam lisensi ini sebagai bagian dari produk komersial tanpa izin
+
+---
+
+# 34. Informasi Hak Cipta
+
+**Midnight Stream**
+
+Copyright © 2026 **Raihan Azhar (@reyhanitsme)**
+
+All rights reserved except as expressly granted under this license.
+
+Repository:
+
+https://github.com/reyhanitsme/midnight-stream-godot
+
+Contact:
+
+**+62 831-7769-4170 — Prixma Studio**
+
+---
+
+# 35. Pernyataan Akhir
+
+Midnight Stream dibuat untuk dapat dipelajari, dimodifikasi, dikembangkan, dibuatkan mod, di-fork, di-remake, dan dibagikan oleh komunitas.
+
+Kebebasan tersebut diberikan dengan satu prinsip utama:
+
+> **Bebas berkarya, bebas memodifikasi, bebas membagikan — tetapi jangan menjadikan Midnight Stream atau karya turunannya sebagai barang yang dijual atau sebagai sumber pendapatan langsung dari distribusinya.**
+
+Pendapatan yang berasal dari pembuatan konten mengenai Midnight Stream, seperti YouTube, streaming, review, dan aktivitas media lainnya, tidak dilarang selama tidak mengubah game/mod itu sendiri menjadi produk berbayar atau monetisasi langsung terhadap proses distribusinya.
+
+Dengan menggunakan materi yang tercakup dalam lisensi ini, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh ketentuan lisensi.

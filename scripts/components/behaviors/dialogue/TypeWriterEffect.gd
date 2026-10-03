@@ -1,10 +1,20 @@
+## Node pembantu untuk menghasilkan efek ketikan teks mesin tik per karakter dengan SFX audio.
+##
+## Cara pakai:
+##   var tw = TypewriterEffect.new()
+##   add_child(tw)
+##   tw.typing_finished.connect(func(): print("Selesai ngetik!"))
+##   tw.start_typing(my_label, "Halo Rian...", 40.0)
+##   # Untuk skip langsung ke teks penuh saat tombol ditekan:
+##   if tw.is_active():
+##       tw.finish()
 class_name TypewriterEffect
 extends Node
 
 signal character_typed(char_index: int)
 signal typing_finished
 
-const DEFAULT_SFX_PATH: String = "res://assets/audio/sfx/sfx-click-button.mp3"
+const DEFAULT_SFX_PATH: String = AssetPaths.Audios.SFX_CLICK
 
 var target_label: Label
 var sfx_player: AudioStreamPlayer

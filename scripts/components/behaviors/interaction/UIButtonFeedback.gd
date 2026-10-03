@@ -1,3 +1,10 @@
+## Helper komponen yang menambahkan efek klik (scale down + Y offset) dan SFX ke tombol Control.
+##
+## Cara pakai:
+##   # Tambahkan sebagai child dari Button manapun:
+##   var feedback = UIButtonFeedback.new()
+##   my_button.add_child(feedback)
+##   # Otomatis mendeteksi parent tombol dan mengaitkan sinyal down/up/pressed.
 class_name UIButtonFeedback
 extends Node
 

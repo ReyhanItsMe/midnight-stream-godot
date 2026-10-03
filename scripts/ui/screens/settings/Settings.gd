@@ -3,7 +3,7 @@ extends Control
 # --- RESOURCE PATHS ---
 const BG_PATH: String = "res://assets/ui/backgrounds/setting/background-setting.png"
 const BACK_SCENE_PATH: String = "res://scenes/ui/screens/main_menu/MainMenu.tscn"
-const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/MenuButton.tscn")
+const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/GameMenuButton.tscn")
 
 # --- UI TEXTS & LABELS ---
 const TEXT_HEADER: String = "STREAM & AUDIO SETTINGS"

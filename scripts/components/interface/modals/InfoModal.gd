@@ -1,3 +1,12 @@
+## Modal serbaguna untuk pesan informasi tunggal atau konfirmasi aksi (Yes/No - OK/Batal).
+##
+## Cara pakai (Pesan Info Biasa):
+##   info_modal.popup("INFO ARSIP", "Pintu gerbang timur berhasil dibuka.")
+##
+## Cara pakai (Konfirmasi Bahaya / Timpa Data):
+##   info_modal.popup_confirm("HAPUS DATA", "Yakin ingin menghapus slot?", "HAPUS", true, func():
+##       SaveManager.delete_slot(1)
+##   )
 class_name InfoModal
 extends BaseModal
 

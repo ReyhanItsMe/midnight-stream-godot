@@ -1,3 +1,10 @@
+## Jendela antarmuka perekaman data untuk 20 Slot Archive di Save Point.
+##
+## Cara pakai:
+##   var save_ui = SaveModal.new()
+##   add_child(save_ui)
+##   save_ui.open() # Membuka slot 1 dan merefresh status arsip
+##   save_ui.save_completed.connect(func(slot): print("Tersimpan di slot: ", slot))
 class_name SaveModal
 extends BaseModal
 

@@ -1,3 +1,13 @@
+## UI Kotak dialog lengkap dengan sistem antrean teks, portrait ekspresi dinamis, dan typewriter.
+##
+## Cara pakai:
+##   var diag = DialogueBox.new()
+##   add_child(diag)
+##   diag.start_dialogue([
+##       {"speaker": "Rian", "text": "Tempat apa ini...", "side": "left", "expression": "bingung", "speed": 32.0},
+##       {"speaker": "Misterius", "text": "Jangan mendekat.", "side": "right", "expression": "biasa", "speed": 24.0}
+##   ])
+##   diag.dialogue_finished.connect(func(): print("Percakapan usai."))
 class_name DialogueBox
 extends Control
 
