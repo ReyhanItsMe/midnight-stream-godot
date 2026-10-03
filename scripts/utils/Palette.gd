@@ -80,7 +80,20 @@ const PURPLE_LIGHT: Color     = Color(0.75, 0.52, 0.98, 1.0)
 const TRANSPARENT: Color    = Color(0.0, 0.0, 0.0, 0.0)
 
 # ==============================================================================
-# 8. HELPER: GRADASI & TRANSPARANSI DINAMIS
+# 8. UI SEMANTIC ALIASES (Menghubungkan komponen UI ke warna dasar di atas)
+# ==============================================================================
+const RED_ACCENT: Color       = RED
+const TEXT_MUTED: Color       = GRAY_LIGHT
+const BG_DARK: Color          = BLACK_DEEP
+const BG_MODAL: Color         = BLACK_MODAL
+const BG_CARD: Color          = BLACK_CARD
+const BG_SLOT: Color          = SLATE_DARK
+const BG_OVERLAY: Color       = BLACK_DEEP
+const BORDER_DARK: Color      = SLATE
+const BORDER_GOLD: Color      = GOLD_DARK
+
+# ==============================================================================
+# 9. HELPER: GRADASI & TRANSPARANSI DINAMIS
 # ==============================================================================
 
 ## Membuat variasi warna dengan alpha kustom instan (misal: Palette.alpha(Palette.GOLD, 0.5))

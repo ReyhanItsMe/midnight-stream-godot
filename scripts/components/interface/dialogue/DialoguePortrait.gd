@@ -9,12 +9,6 @@
 class_name DialoguePortrait
 extends Control
 
-const COL_BORDER_GOLD: Color = Color(0.95, 0.82, 0.25, 0.95)
-const COL_HEADER_BG: Color = Color(0.09, 0.10, 0.16, 1.0)
-
-const RIAN_EXPR_DIR: String = "res://assets/sprites/characters/rian/expressions/"
-const MISTERIUS_EXPR_DIR: String = "res://assets/sprites/characters/mistery/expressions/"
-
 var avatar_rect: TextureRect
 var name_badge: PanelContainer
 var name_label: Label
@@ -36,9 +30,9 @@ func _build_ui() -> void:
 	name_badge.custom_minimum_size = Vector2(96, 20)
 	name_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var st := StyleBoxFlat.new()
-	st.bg_color = COL_HEADER_BG
+	st.bg_color = Palette.alpha(Palette.BG_SLOT, 1.0)
 	st.set_border_width_all(1)
-	st.border_color = COL_BORDER_GOLD
+	st.border_color = Palette.GOLD
 	name_badge.add_theme_stylebox_override("panel", st)
 
 	var margin := MarginContainer.new()
@@ -53,7 +47,7 @@ func _build_ui() -> void:
 	margin.add_child(name_label)
 	add_child(name_badge)
 
-	_apply_font(name_label, 9, COL_BORDER_GOLD)
+	_apply_font(name_label, 9, Palette.GOLD)
 
 func setup_speaker(speaker: String, expression: String, is_left: bool, box_width: float, animate: bool) -> void:
 	var tex := _resolve_expression_texture(speaker, expression)
@@ -93,11 +87,12 @@ func _resolve_expression_texture(speaker: String, expression: String) -> Texture
 	var path: String = ""
 
 	if clean_name == "rian":
-		path = RIAN_EXPR_DIR + "rian_kepala_" + expression + ".png"
+		var base_dir: String = AssetPaths.Sprites.RIAN_EXPR_DIR
+		path = base_dir + "rian_kepala_" + expression + ".png"
 		if not ResourceLoader.exists(path):
-			path = RIAN_EXPR_DIR + "rian_kepala_biasa.png"
+			path = base_dir + "rian_kepala_biasa.png"
 	elif "misteri" in clean_name or "stranger" in clean_name or "sosok" in clean_name:
-		path = MISTERIUS_EXPR_DIR + "misterius_kepala.png"
+		path = AssetPaths.Sprites.MISTERY_EXPR_DIR + "misterius_kepala.png"
 
 	if path != "" and ResourceLoader.exists(path):
 		return load(path)

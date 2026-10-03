@@ -16,11 +16,11 @@ signal inventory_synced
 
 # --- CONSTANTS ---
 const SLOT_FILE_TEMPLATE: String = "user://save_slot_%d.json"
+const SETTINGS_FILE_PATH: String = "user://settings.json"
 const MAX_SLOTS: int = 20
 const MAX_SANITY: float = 100.0
 const MAX_BATTERY: float = 100.0
 const CRITICAL_SANITY_THRESHOLD: float = 25.0
-const DEFAULT_GAMEPLAY_SCENE: String = "res://scenes/gameplay/prologue/Prologue.tscn"
 
 # --- DEFAULT SCHEMA ---
 var default_data: Dictionary = {
@@ -28,7 +28,7 @@ var default_data: Dictionary = {
 		"save_date": "",
 		"chapter_title": "CHAPTER 1 // SANATORIUM DAHLIA",
 		"play_time_seconds": 0,
-		"scene_path": DEFAULT_GAMEPLAY_SCENE
+		"scene_path": ScenePaths.Maps.PROLOGUE
 	},
 	"player": {
 		"position_x": -180.0,
@@ -43,6 +43,11 @@ var default_data: Dictionary = {
 		"items": [],
 		"hotbar": [],
 		"current_weight": 0.0
+	},
+	"settings": {
+		"bgm_volume": 0.5,
+		"sfx_volume": 1.0,
+		"screen_shake_enabled": true
 	},
 	"story_flags": {
 		"chapter": 1,
@@ -60,6 +65,7 @@ var play_time_timer: float = 0.0
 
 func _ready() -> void:
 	current_data = default_data.duplicate(true)
+	load_settings()
 
 func _process(delta: float) -> void:
 	play_time_timer += delta
@@ -163,6 +169,60 @@ func _check_sanity_status(val: float) -> void:
 		sanity_depleted.emit()
 
 # ==============================================================================
+# SISTEM SETTINGS PERSISTENCE & AUDIO BUS
+# ==============================================================================
+
+## Menyimpan konfigurasi audio dan gameplay ke disk
+func save_settings() -> void:
+	if not current_data.has("settings"):
+		return
+
+	var file := FileAccess.open(SETTINGS_FILE_PATH, FileAccess.WRITE)
+	if not file:
+		push_error("[SaveManager] Gagal menyimpan file settings: ", FileAccess.get_open_error())
+		return
+
+	file.store_string(JSON.stringify(current_data["settings"], "\t"))
+	file.close()
+
+## Memuat konfigurasi audio dan gameplay saat boot
+func load_settings() -> void:
+	if not FileAccess.file_exists(SETTINGS_FILE_PATH):
+		apply_audio_settings()
+		return
+
+	var file := FileAccess.open(SETTINGS_FILE_PATH, FileAccess.READ)
+	if not file:
+		return
+
+	var json := JSON.new()
+	if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
+		if not current_data.has("settings"):
+			current_data["settings"] = {}
+		current_data["settings"].merge(json.data, true)
+
+	apply_audio_settings()
+
+## Menerapkan konfigurasi volume langsung ke audio server bus
+func apply_audio_settings() -> void:
+	if not current_data.has("settings"):
+		return
+
+	var conf: Dictionary = current_data["settings"]
+	var bgm_val: float = float(conf.get("bgm_volume", 0.5))
+	var sfx_val: float = float(conf.get("sfx_volume", 1.0))
+
+	var bgm_idx := AudioServer.get_bus_index("BGM")
+	if bgm_idx != -1:
+		AudioServer.set_bus_mute(bgm_idx, is_zero_approx(bgm_val))
+		AudioServer.set_bus_volume_db(bgm_idx, -80.0 if is_zero_approx(bgm_val) else linear_to_db(bgm_val))
+
+	var sfx_idx := AudioServer.get_bus_index("SFX")
+	if sfx_idx != -1:
+		AudioServer.set_bus_mute(sfx_idx, is_zero_approx(sfx_val))
+		AudioServer.set_bus_volume_db(sfx_idx, -80.0 if is_zero_approx(sfx_val) else linear_to_db(sfx_val))
+
+# ==============================================================================
 # SISTEM 20 SLOT RECOVERY LOG & LOADGAME
 # ==============================================================================
 
@@ -212,7 +272,7 @@ func get_saved_scene_path() -> String:
 		var path: String = current_data["meta"]["scene_path"]
 		if ResourceLoader.exists(path):
 			return path
-	return DEFAULT_GAMEPLAY_SCENE
+	return ScenePaths.Maps.PROLOGUE
 
 func save_game(slot_index: int = -1) -> bool:
 	if slot_index == -1:

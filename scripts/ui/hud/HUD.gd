@@ -1,5 +1,5 @@
-extends CanvasLayer
 class_name HUD
+extends CanvasLayer
 
 static var instance: HUD
 
@@ -21,20 +21,20 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	layer = 10 # HUD_LAYER_INDEX
 	
-	# 1. Merakit UI Parts
-	virtual_controls = preload("res://scripts/ui/hud/parts/VirtualControls.gd").new()
+	# 1. Merakit UI Parts langsung via class_name
+	virtual_controls = VirtualControls.new()
 	add_child(virtual_controls)
 	
-	sanity_bar = preload("res://scripts/ui/hud/parts/SanityBar.gd").new()
+	sanity_bar = SanityBar.new()
 	add_child(sanity_bar)
 	
-	stamina_bar = preload("res://scripts/ui/hud/parts/StaminaBar.gd").new()
+	stamina_bar = StaminaBar.new()
 	add_child(stamina_bar)
 	
-	prompt_ui = preload("res://scripts/ui/hud/parts/InteractionPrompt.gd").new()
+	prompt_ui = InteractionPrompt.new()
 	add_child(prompt_ui)
 	
-	hotbar_ui = preload("res://scripts/ui/hud/parts/HotbarContainer.gd").new()
+	hotbar_ui = HotbarContainer.new()
 	add_child(hotbar_ui)
 	
 	# 2. Inisialisasi Modals
@@ -70,7 +70,7 @@ func start_dialogue(lines: Array[Dictionary], callback: Callable = Callable()) -
 			if not dialogue_box.dialogue_finished.is_connected(callback):
 				dialogue_box.dialogue_finished.connect(callback, CONNECT_ONE_SHOT)
 
-		## Proxy helper untuk menampilkan atau menyembunyikan tombol ajak bicara [E]
+## Proxy helper untuk menampilkan atau menyembunyikan tombol ajak bicara [E]
 func set_talk_prompt_visible(show_btn: bool, callable: Callable = Callable()) -> void:
 	if prompt_ui and prompt_ui.has_method("set_talk_prompt_visible"):
 		prompt_ui.set_talk_prompt_visible(show_btn, callable)

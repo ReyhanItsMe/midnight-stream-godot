@@ -1,3 +1,4 @@
+class_name VirtualControls
 extends Control
 
 const TOUCH_BTN_SIZE: Vector2 = Vector2(48, 48)

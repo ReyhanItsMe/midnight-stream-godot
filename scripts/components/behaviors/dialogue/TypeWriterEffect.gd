@@ -14,7 +14,7 @@ extends Node
 signal character_typed(char_index: int)
 signal typing_finished
 
-const DEFAULT_SFX_PATH: String = AssetPaths.Audios.SFX_CLICK
+var DEFAULT_SFX_PATH: String = AssetPaths.Audios.SFX_CLICK
 
 var target_label: Label
 var sfx_player: AudioStreamPlayer

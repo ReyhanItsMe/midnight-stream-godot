@@ -1,3 +1,4 @@
+class_name InteractionPrompt
 extends Control
 
 var prompt_container: PanelContainer

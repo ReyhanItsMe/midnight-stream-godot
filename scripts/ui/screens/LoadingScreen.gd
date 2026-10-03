@@ -1,21 +1,11 @@
-extends Control
+## Layar pemuatan beranimasi (Loading Screen) dengan thread background resource loader.
+##
+## Menggunakan tekstur lari karakter dari AssetPaths dan tema warna dari Palette.
 class_name LoadingScreen
+extends Control
 
 const VIEWPORT_RES: Vector2 = Vector2(640, 360)
-
-const RUN_FRAMES: Array[String] = [
-	"res://assets/sprites/characters/rian/kanan_1.png",
-	"res://assets/sprites/characters/rian/kanan_2.png",
-	"res://assets/sprites/characters/rian/kanan_3.png"
-]
-
-const COL_BG_DEEP: Color = Color(0.02, 0.02, 0.04, 1.0)
-const COL_BAR_BG: Color = Color(0.06, 0.08, 0.12, 0.95)
-const COL_BAR_FILL: Color = Color(0.95, 0.82, 0.25, 1.0)
-const COL_BORDER_GOLD: Color = Color(0.65, 0.55, 0.22, 0.9)
-const COL_BORDER_OUTER: Color = Color(0.18, 0.20, 0.28, 0.7)
-const COL_TEXT_GOLD: Color = Color(0.95, 0.82, 0.25, 1.0)
-const COL_TEXT_MUTED: Color = Color(0.50, 0.55, 0.65, 1.0)
+const FRAME_DURATION: float = 0.11
 
 var target_scene_path: String = "":
 	set(val):
@@ -30,7 +20,6 @@ var run_textures: Array[Texture2D] = []
 var sprite_rian: TextureRect
 var frame_timer: float = 0.0
 var current_frame_idx: int = 0
-const FRAME_DURATION: float = 0.11
 
 var progress_bar: ProgressBar
 var lbl_percentage: Label
@@ -60,9 +49,18 @@ func _begin_threaded_load() -> void:
 		get_tree().change_scene_to_file(target_scene_path)
 
 func _load_textures() -> void:
-	for p in RUN_FRAMES:
-		if ResourceLoader.exists(p):
-			run_textures.append(load(p))
+	var base_rian: String = AssetPaths.Sprites.CHAR_RIAN_DIR
+	var run_files: Array[String] = [
+		base_rian + "kanan_1.png",
+		base_rian + "kanan_2.png",
+		base_rian + "kanan_3.png"
+	]
+	
+	for path in run_files:
+		if ResourceLoader.exists(path):
+			run_textures.append(load(path))
+		else:
+			push_warning("[LoadingScreen] Frame lari tidak ditemukan: " + path)
 
 func _build_ui() -> void:
 	var root_node = Engine.get_main_loop().root if Engine.get_main_loop() else null
@@ -71,7 +69,7 @@ func _build_ui() -> void:
 	# Background Gelap
 	var bg := ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.color = COL_BG_DEEP
+	bg.color = Palette.BG_DARK
 	add_child(bg)
 
 	# Vignette Radial
@@ -79,7 +77,10 @@ func _build_ui() -> void:
 	vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	var grad := Gradient.new()
-	grad.colors = PackedColorArray([Color(0.08, 0.10, 0.16, 0.15), Color(0.00, 0.00, 0.00, 0.95)])
+	grad.colors = PackedColorArray([
+		Palette.alpha(Palette.BG_OVERLAY, 0.15),
+		Palette.alpha(Palette.BLACK, 0.95)
+	])
 	var grad_tex := GradientTexture2D.new()
 	grad_tex.gradient = grad
 	grad_tex.fill = GradientTexture2D.FILL_RADIAL
@@ -117,9 +118,9 @@ func _build_ui() -> void:
 	bar_outer_frame.custom_minimum_size = Vector2(324, 12)
 	bar_outer_frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var outer_style := StyleBoxFlat.new()
-	outer_style.bg_color = Color(0.03, 0.04, 0.06, 0.8)
+	outer_style.bg_color = Palette.alpha(Palette.BG_DARK, 0.85)
 	outer_style.set_border_width_all(1)
-	outer_style.border_color = COL_BORDER_OUTER
+	outer_style.border_color = Palette.alpha(Palette.BORDER_DARK, 0.7)
 	outer_style.content_margin_left = 2
 	outer_style.content_margin_right = 2
 	outer_style.content_margin_top = 2
@@ -137,12 +138,12 @@ func _build_ui() -> void:
 	progress_bar.value = 0.0
 
 	var bg_st := StyleBoxFlat.new()
-	bg_st.bg_color = COL_BAR_BG
+	bg_st.bg_color = Palette.alpha(Palette.BG_SLOT, 0.95)
 	bg_st.set_border_width_all(1)
-	bg_st.border_color = COL_BORDER_GOLD
+	bg_st.border_color = Palette.BORDER_GOLD
 
 	var fill_st := StyleBoxFlat.new()
-	fill_st.bg_color = COL_BAR_FILL
+	fill_st.bg_color = Palette.GOLD
 
 	progress_bar.add_theme_stylebox_override("background", bg_st)
 	progress_bar.add_theme_stylebox_override("fill", fill_st)
@@ -158,19 +159,19 @@ func _build_ui() -> void:
 	lbl_status.text = "ESTABLISHING LIVE STREAM..."
 	lbl_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if font_mgr and font_mgr.has_method("apply"):
-		font_mgr.apply(lbl_status, 2, 9, COL_TEXT_MUTED)
+		font_mgr.apply(lbl_status, 2, 9, Palette.TEXT_MUTED)
 	else:
 		lbl_status.add_theme_font_size_override("font_size", 9)
-		lbl_status.add_theme_color_override("font_color", COL_TEXT_MUTED)
+		lbl_status.add_theme_color_override("font_color", Palette.TEXT_MUTED)
 	info_hbox.add_child(lbl_status)
 
 	lbl_percentage = Label.new()
 	lbl_percentage.text = "0%"
 	if font_mgr and font_mgr.has_method("apply"):
-		font_mgr.apply(lbl_percentage, 3, 11, COL_TEXT_GOLD)
+		font_mgr.apply(lbl_percentage, 3, 11, Palette.GOLD)
 	else:
 		lbl_percentage.add_theme_font_size_override("font_size", 11)
-		lbl_percentage.add_theme_color_override("font_color", COL_TEXT_GOLD)
+		lbl_percentage.add_theme_color_override("font_color", Palette.GOLD)
 	info_hbox.add_child(lbl_percentage)
 
 func _process(delta: float) -> void:
@@ -191,7 +192,6 @@ func _update_loading_progress(delta: float) -> void:
 	if is_loading_complete:
 		return
 
-	# Jika scene path kosong, batalkan hanging loading
 	if target_scene_path == "":
 		return
 
@@ -201,11 +201,9 @@ func _update_loading_progress(delta: float) -> void:
 	if not progress_array.is_empty():
 		target_progress = progress_array[0] * 100.0
 
-	# JIKA SUDAH SELESAI DI LOAD OLEH RESOURCE LOADER, LANGSUNG ARAHKAN PROGRESS KE 100
 	if status == ResourceLoader.THREAD_LOAD_LOADED:
 		target_progress = 100.0
 
-	# Interpolasi nilai progress bar agar ada transisi halus
 	displayed_progress = move_toward(displayed_progress, target_progress, delta * 140.0)
 	progress_bar.value = displayed_progress
 	lbl_percentage.text = "%d%%" % int(displayed_progress)
@@ -218,7 +216,7 @@ func _update_loading_progress(delta: float) -> void:
 
 		var overlay := ColorRect.new()
 		overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-		overlay.color = Color(0, 0, 0, 0)
+		overlay.color = Palette.alpha(Palette.BLACK, 0.0)
 		overlay.z_index = 100
 		add_child(overlay)
 

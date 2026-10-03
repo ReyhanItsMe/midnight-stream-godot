@@ -1,9 +1,9 @@
+## Skrip layar pengaturan Stream & Audio Settings.
+##
+## Mengatur volume BGM, SFX, dan Screen Shake yang terhubung
+## langsung ke SaveManager dan ScenePaths.
+class_name Settings
 extends Control
-
-# --- RESOURCE PATHS ---
-const BG_PATH: String = "res://assets/ui/backgrounds/setting/background-setting.png"
-const BACK_SCENE_PATH: String = "res://scenes/ui/screens/main_menu/MainMenu.tscn"
-const MENU_BUTTON_SCENE: PackedScene = preload("res://scenes/components/interface/buttons/GameMenuButton.tscn")
 
 # --- UI TEXTS & LABELS ---
 const TEXT_HEADER: String = "STREAM & AUDIO SETTINGS"
@@ -11,11 +11,6 @@ const TEXT_BGM: String = "BGM VOLUME"
 const TEXT_SFX: String = "SFX VOLUME"
 const TEXT_SHAKE: String = "SCREEN SHAKE"
 const TEXT_BACK: String = "< BACK TO STUDIO"
-
-# --- THEME COLORS ---
-const COLOR_HEADER: Color = Color(0.95, 0.82, 0.25)
-const COLOR_LABEL: Color = Color(0.9, 0.92, 0.95)
-const COLOR_VALUE: Color = Color(0.95, 0.82, 0.25)
 
 # --- TIMINGS & TRANSITIONS ---
 const FADE_DURATION: float = 0.35
@@ -25,16 +20,20 @@ var bgm_percent: int = 50
 var sfx_percent: int = 100
 var screen_shake: bool = true
 
+# Dependency Scene
+var menu_button_scene: PackedScene
+
 # Label Displays
 var lbl_bgm_val: Label
 var lbl_sfx_val: Label
 var lbl_shake_val: Label
 
 func _ready() -> void:
-	# Pastikan BGM Menu tetap menyala
+	# 1. Pastikan BGM Menu tetap berjalan
 	AudioManager.play_menu_bgm()
+	_load_scene_resources()
 
-	# Ambil data dari SaveManager
+	# 2. Ambil preferensi audio & gameplay dari SaveManager
 	if SaveManager and SaveManager.current_data.has("settings"):
 		var conf: Dictionary = SaveManager.current_data["settings"]
 		var raw_bgm = conf.get("bgm_volume", 0.5)
@@ -43,16 +42,17 @@ func _ready() -> void:
 		sfx_percent = int(float(raw_sfx) * 100 if float(raw_sfx) <= 1.0 else float(raw_sfx))
 		screen_shake = conf.get("screen_shake_enabled", true)
 
-	# 1. Background Setting
+	# 3. Background Layar Setting
 	var bg := TextureRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_SCALE
-	if ResourceLoader.exists(BG_PATH):
-		bg.texture = load(BG_PATH)
+	var bg_path: String = AssetPaths.UI.BG_SETTINGS
+	if ResourceLoader.exists(bg_path):
+		bg.texture = load(bg_path)
 	add_child(bg)
 
-	# 2. Center Container
+	# 4. Center Container
 	var center_cont := CenterContainer.new()
 	center_cont.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center_cont)
@@ -66,14 +66,14 @@ func _ready() -> void:
 	var title := Label.new()
 	title.text = TEXT_HEADER
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	FontManager.apply(title, FontManager.Type.TITLE, 14, COLOR_HEADER)
+	FontManager.apply(title, FontManager.Type.TITLE, 14, Palette.GOLD)
 	main_vbox.add_child(title)
 
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 4)
 	main_vbox.add_child(spacer)
 
-	# 3. Baris Pengaturan
+	# 5. Baris Pengaturan
 	var rows_vbox := VBoxContainer.new()
 	rows_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	rows_vbox.add_theme_constant_override("separation", 8)
@@ -98,13 +98,19 @@ func _ready() -> void:
 	spacer_back.custom_minimum_size = Vector2(0, 8)
 	main_vbox.add_child(spacer_back)
 
-	# 4. Tombol < BACK TO STUDIO
-	var btn_back: GameMenuButton = MENU_BUTTON_SCENE.instantiate()
+	# 6. Tombol < BACK TO STUDIO
+	var btn_back: GameMenuButton = menu_button_scene.instantiate()
 	btn_back.text = TEXT_BACK
 	btn_back.set_dimensions(196, 24)
 	btn_back.pressed.connect(_on_back_pressed)
 	main_vbox.add_child(btn_back)
 
+func _load_scene_resources() -> void:
+	var btn_path: String = ScenePaths.UIComponents.MENU_BUTTON
+	if ResourceLoader.exists(btn_path):
+		menu_button_scene = load(btn_path)
+	else:
+		push_error("[Settings] Menu button scene tidak ditemukan di: " + btn_path)
 
 func create_stepper_row(parent: VBoxContainer, label_title: String, initial_val: String, on_minus: Callable, on_plus: Callable) -> Label:
 	var hbox := HBoxContainer.new()
@@ -116,11 +122,11 @@ func create_stepper_row(parent: VBoxContainer, label_title: String, initial_val:
 	var lbl := Label.new()
 	lbl.text = label_title
 	lbl.custom_minimum_size = Vector2(110, 0)
-	FontManager.apply(lbl, FontManager.Type.BODY, 10, COLOR_LABEL)
+	FontManager.apply(lbl, FontManager.Type.BODY, 10, Palette.WHITE)
 	hbox.add_child(lbl)
 
 	# Tombol [-]
-	var btn_minus: GameMenuButton = MENU_BUTTON_SCENE.instantiate()
+	var btn_minus: GameMenuButton = menu_button_scene.instantiate()
 	btn_minus.text = "-"
 	btn_minus.set_dimensions(24, 20)
 	btn_minus.set_variant(GameMenuButton.Variant.ACCENT)
@@ -132,11 +138,11 @@ func create_stepper_row(parent: VBoxContainer, label_title: String, initial_val:
 	lbl_val.text = initial_val
 	lbl_val.custom_minimum_size = Vector2(46, 0)
 	lbl_val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	FontManager.apply(lbl_val, FontManager.Type.DIGITAL, 11, COLOR_VALUE)
+	FontManager.apply(lbl_val, FontManager.Type.DIGITAL, 11, Palette.GOLD)
 	hbox.add_child(lbl_val)
 
 	# Tombol [+]
-	var btn_plus: GameMenuButton = MENU_BUTTON_SCENE.instantiate()
+	var btn_plus: GameMenuButton = menu_button_scene.instantiate()
 	btn_plus.text = "+"
 	btn_plus.set_dimensions(24, 20)
 	btn_plus.set_variant(GameMenuButton.Variant.ACCENT)
@@ -144,7 +150,6 @@ func create_stepper_row(parent: VBoxContainer, label_title: String, initial_val:
 	hbox.add_child(btn_plus)
 
 	return lbl_val
-
 
 func change_volume(bus_type: String, delta_val: int) -> void:
 	if bus_type == "bgm":
@@ -160,17 +165,15 @@ func change_volume(bus_type: String, delta_val: int) -> void:
 			SaveManager.current_data["settings"]["sfx_volume"] = float(sfx_percent) / 100.0
 			SaveManager.apply_audio_settings()
 
-
 func toggle_shake() -> void:
 	screen_shake = !screen_shake
 	lbl_shake_val.text = "ON" if screen_shake else "OFF"
 	if SaveManager and SaveManager.current_data.has("settings"):
 		SaveManager.current_data["settings"]["screen_shake_enabled"] = screen_shake
 
-
 func _on_back_pressed() -> void:
-	# Pastikan setting tersimpan permanen ke file disk sebelum pindah scene
+	# Simpan setting permanen ke disk sebelum berpindah layar
 	if SaveManager:
 		SaveManager.save_settings()
 
-	TransitionManager.change_scene(BACK_SCENE_PATH, FADE_DURATION)
+	TransitionManager.change_scene(ScenePaths.Screens.MAIN_MENU, FADE_DURATION)

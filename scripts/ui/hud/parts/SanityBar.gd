@@ -1,3 +1,4 @@
+class_name SanityBar
 extends MarginContainer
 
 const SANITY_BAR_SIZE: Vector2 = Vector2(96, 6)

@@ -9,10 +9,6 @@ class_name PauseModal
 extends Control
 
 const VIEWPORT_RES: Vector2 = Vector2(640, 360)
-const MAIN_MENU_PATH: String = "res://scenes/ui/screens/main_menu/MainMenu.tscn"
-
-const COL_BG_DARK: Color = Color(0.05, 0.06, 0.09, 0.96)
-const COL_BORDER_GOLD: Color = Color(0.65, 0.55, 0.22, 0.85)
 
 var btn_pause_hud: GameMenuButton
 var overlay_bg: ColorRect
@@ -58,7 +54,7 @@ func _build_hud_pause_button() -> void:
 
 func _build_modal_structure() -> void:
 	overlay_bg = ColorRect.new()
-	overlay_bg.color = Color(0.01, 0.01, 0.02, 0.84)
+	overlay_bg.color = Palette.alpha(Palette.BG_OVERLAY, 0.84)
 	overlay_bg.custom_minimum_size = VIEWPORT_RES
 	overlay_bg.visible = false
 	add_child(overlay_bg)
@@ -74,9 +70,9 @@ func _build_modal_structure() -> void:
 
 	card_panel = PanelContainer.new()
 	var card_style := StyleBoxFlat.new()
-	card_style.bg_color = COL_BG_DARK
+	card_style.bg_color = Palette.alpha(Palette.BG_DARK, 0.96)
 	card_style.set_border_width_all(1)
-	card_style.border_color = COL_BORDER_GOLD
+	card_style.border_color = Palette.BORDER_GOLD
 	card_panel.add_theme_stylebox_override("panel", card_style)
 	modal_wrapper.add_child(card_panel)
 
@@ -147,8 +143,5 @@ func _confirm_back_to_menu() -> void:
 	if fade_canvas:
 		fade_canvas.queue_free()
 
-	var trans_mgr: Node = get_node_or_null("/root/TransitionManager")
-	if trans_mgr and trans_mgr.has_method("change_scene"):
-		trans_mgr.change_scene(MAIN_MENU_PATH)
-	else:
-		get_tree().change_scene_to_file(MAIN_MENU_PATH)
+	# Arahkan ke ScenePaths.Screens.MAIN_MENU via TransitionManager
+	TransitionManager.change_scene(ScenePaths.Screens.MAIN_MENU, 0.4)

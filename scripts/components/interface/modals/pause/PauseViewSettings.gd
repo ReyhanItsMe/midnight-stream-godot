@@ -3,10 +3,6 @@ extends VBoxContainer
 
 signal back_requested
 
-const STEPPER_ROW_SCRIPT: GDScript = preload("res://scripts/components/interface/widgets/StepperSettingRow.gd")
-const COL_HEADER_BG: Color = Color(0.09, 0.10, 0.16, 1.0)
-const COL_GOLD: Color = Color(0.95, 0.82, 0.25, 1.0)
-
 var bgm_pct: int = 20
 var sfx_pct: int = 100
 var screen_shake_on: bool = true
@@ -34,22 +30,22 @@ func _init() -> void:
 	margin.add_child(body)
 	add_child(margin)
 
-	row_bgm = STEPPER_ROW_SCRIPT.new("BGM VOLUME", "20%")
+	row_bgm = StepperSettingRow.new("BGM VOLUME", "20%")
 	row_bgm.connect("value_decreased", func(): _step_bgm(-10))
 	row_bgm.connect("value_increased", func(): _step_bgm(10))
 	body.add_child(row_bgm)
 
-	row_sfx = STEPPER_ROW_SCRIPT.new("SFX VOLUME", "100%")
+	row_sfx = StepperSettingRow.new("SFX VOLUME", "100%")
 	row_sfx.connect("value_decreased", func(): _step_sfx(-10))
 	row_sfx.connect("value_increased", func(): _step_sfx(10))
 	body.add_child(row_sfx)
 
-	row_shake = STEPPER_ROW_SCRIPT.new("SCREEN SHAKE", "ON")
+	row_shake = StepperSettingRow.new("SCREEN SHAKE", "ON")
 	row_shake.connect("value_decreased", _toggle_shake)
 	row_shake.connect("value_increased", _toggle_shake)
 	body.add_child(row_shake)
 
-	row_flash = STEPPER_ROW_SCRIPT.new("FLASHLIGHT BEAM", "NORM")
+	row_flash = StepperSettingRow.new("FLASHLIGHT BEAM", "NORM")
 	row_flash.connect("value_decreased", func(): _step_flash(-1))
 	row_flash.connect("value_increased", func(): _step_flash(1))
 	body.add_child(row_flash)
@@ -150,9 +146,9 @@ func _build_header(title_str: String) -> void:
 	var header_box := PanelContainer.new()
 	header_box.custom_minimum_size = Vector2(0, 26)
 	var style := StyleBoxFlat.new()
-	style.bg_color = COL_HEADER_BG
+	style.bg_color = Palette.alpha(Palette.BG_SLOT, 1.0)
 	style.border_width_bottom = 1
-	style.border_color = Color(0.20, 0.22, 0.30, 1.0)
+	style.border_color = Palette.alpha(Palette.BORDER_DARK, 0.8)
 	header_box.add_theme_stylebox_override("panel", style)
 
 	var lbl := Label.new()
@@ -161,9 +157,9 @@ func _build_header(title_str: String) -> void:
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	var font_mgr: Node = Engine.get_main_loop().root.get_node_or_null("FontManager") if (Engine.get_main_loop() and Engine.get_main_loop().root) else null
 	if font_mgr and font_mgr.has_method("apply"):
-		font_mgr.apply(lbl, 1, 10, COL_GOLD)
+		font_mgr.apply(lbl, 1, 10, Palette.GOLD)
 	else:
 		lbl.add_theme_font_size_override("font_size", 10)
-		lbl.add_theme_color_override("font_color", COL_GOLD)
+		lbl.add_theme_color_override("font_color", Palette.GOLD)
 	header_box.add_child(lbl)
 	add_child(header_box)

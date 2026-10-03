@@ -1,3 +1,4 @@
+class_name HotbarContainer
 extends HBoxContainer
 
 var hotbar_slots_ui: Array[PanelContainer] = []

@@ -8,7 +8,6 @@
 class_name UIButtonFeedback
 extends Node
 
-const DEFAULT_SFX_PATH: String = "res://assets/audio/sfx/clicks/sfx-click-button.mp3"
 const SFX_PITCH_FAST: float = 1.35
 const CLICK_SCALE_DOWN: Vector2 = Vector2(0.95, 0.95)
 const CLICK_PIXEL_OFFSET_Y: float = 1.5
@@ -48,8 +47,12 @@ func _setup_audio() -> void:
 
 	if custom_sfx:
 		sfx_player.stream = custom_sfx
-	elif ResourceLoader.exists(DEFAULT_SFX_PATH):
-		sfx_player.stream = load(DEFAULT_SFX_PATH)
+	else:
+		var default_sfx_path: String = AssetPaths.Audios.SFX_CLICK
+		if ResourceLoader.exists(default_sfx_path):
+			sfx_player.stream = load(default_sfx_path)
+		else:
+			push_warning("[UIButtonFeedback] SFX default tidak ditemukan: " + default_sfx_path)
 
 	add_child(sfx_player)
 

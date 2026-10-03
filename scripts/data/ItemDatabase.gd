@@ -15,7 +15,7 @@ const ITEMS: Dictionary = {
 		"weight": 0.5,
 		"max_stack": 1,
 		"desc": "Kunci tua berbahan perunggu kusam. Berbau karat besi dan darah kering dari pintu Bangsal Timur.",
-		"icon_path": "res://assets/sprites/props/key/key-1/Key1-BRONZE.png"
+		"icon_path": AssetPaths.Sprites.KEY_BRONZE
 	},
 	"kunci_emas_kepala": {
 		"name": "KUNCI RUANG DOKTER",
@@ -23,7 +23,7 @@ const ITEMS: Dictionary = {
 		"weight": 0.8,
 		"max_stack": 1,
 		"desc": "Kunci berukir emas milik kepala sanatorium. Membuka ruang arsip rahasia di lantai utama.",
-		"icon_path": "res://assets/sprites/props/key/key-1/Key1-GOLD.png"
+		"icon_path": AssetPaths.Sprites.KEY_GOLD
 	},
 	"kunci_kutukan_mata": {
 		"name": "KUNCI TERKUTUK",
@@ -31,7 +31,7 @@ const ITEMS: Dictionary = {
 		"weight": 2.5,
 		"max_stack": 1,
 		"desc": "Kunci aneh yang terasa berdenyut dingin saat digenggam. Seolah ada sesuatu yang mengintip dari lubangnya.",
-		"icon_path": "res://assets/sprites/props/key/key-6/CURSE/Key8-CURSE-frame0000.png"
+		"icon_path": AssetPaths.Sprites.KEY_CURSE
 	},
 	"baterai_senter": {
 		"name": "BATERAI SENTER (AA)",
@@ -39,7 +39,7 @@ const ITEMS: Dictionary = {
 		"weight": 1.5,
 		"max_stack": 4,
 		"desc": "Baterai cadangan berdaya tinggi. Mengisi ulang daya senter sebesar +50%.",
-		"icon_path": "res://assets/sprites/props/senter/senter_item.png"
+		"icon_path": AssetPaths.Sprites.ITEM_SENTER
 	},
 	"peralatan_berat": {
 		"name": "AKI CADANGAN TUA",
@@ -47,7 +47,7 @@ const ITEMS: Dictionary = {
 		"weight": 4.5,
 		"max_stack": 2,
 		"desc": "Aki timbal bekas generator rumah sakit. Sangat berat dan membuat langkah kaki terasa lambat.",
-		"icon_path": "res://assets/sprites/props/key/key-3/Key3-GREY.png"
+		"icon_path": AssetPaths.Sprites.KEY_GREY
 	}
 }
 
